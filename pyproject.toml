@@ -11,11 +11,12 @@ dependencies = [
     "accelerate>=1.15.0",
     "av",
     "datasets",
-    "causal-conv1d==1.7.0+cu.13.0.torch.2.13",
+    "causal-conv1d==1.7.0+cu.12.6.torch.2.13",
     "flash-linear-attention>=0.5.2",
     "kernels>=0.17.2,<0.18",
     "torch==2.13.0",
     "torchaudio==2.11.0",
+    "torchcodec==0.17.0",
     "torchvision==0.28.0",
     "transformers>=5.20.1",
     "vllm>=0.30.0",
@@ -26,8 +27,8 @@ dependencies = [
 genai-vlm-jailbreak = "genai_vlm_jailbreak:main"
 
 [[tool.uv.index]]
-name = "astral-cu130"
-url = "https://wheels.astral.sh/simple/cu130"
+name = "astral-cu126"
+url = "https://wheels.astral.sh/simple/cu126"
 explicit = true
 
 [[tool.uv.index]]
@@ -36,9 +37,10 @@ url = "https://download.pytorch.org/whl/cu126"
 explicit = true
 
 [tool.uv.sources]
-causal-conv1d = { index = "astral-cu130" }
+causal-conv1d = { index = "astral-cu126" }
 torch = { index = "pytorch-cu126" }
 torchaudio = { index = "pytorch-cu126" }
+torchcodec = { index = "pytorch-cu126" }
 torchvision = { index = "pytorch-cu126" }
 
 [build-system]

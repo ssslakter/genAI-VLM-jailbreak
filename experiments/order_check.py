@@ -87,7 +87,7 @@ def ask(model, processor, video_path: Path, question: str) -> str:
         return_dict=True,
         return_tensors="pt",
         enable_thinking=False,
-        processor_kwargs={"num_frames": NUM_FRAMES},
+        processor_kwargs={"num_frames": NUM_FRAMES, "fps": None, "cap_pixels_per_frame": True},
     )
     inputs = inputs.to(model.device)
     with torch.inference_mode():

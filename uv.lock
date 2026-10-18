@@ -397,20 +397,20 @@ wheels = [
 
 [[package]]
 name = "causal-conv1d"
-version = "1.7.0+cu.13.0.torch.2.13"
-source = { registry = "https://wheels.astral.sh/simple/cu130" }
+version = "1.7.0+cu.12.6.torch.2.13"
+source = { registry = "https://wheels.astral.sh/simple/cu126" }
 dependencies = [
     { name = "ninja" },
     { name = "packaging" },
     { name = "torch" },
 ]
 wheels = [
-    { url = "https://wheels.astral.sh/artifacts/9b3ce786571bfe18e13db403465b3db695073131f0c167cc58eeadc9328c2c21/causal_conv1d-1.7.0+cu.13.0.torch.2.13-cp313-cp313-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:9b3ce786571bfe18e13db403465b3db695073131f0c167cc58eeadc9328c2c21", size = 206967830, upload-time = "2026-10-03T17:53:32Z" },
-    { url = "https://wheels.astral.sh/artifacts/a6257f387166ea282353cf519d27c771d31853aba4c7cdec292d9c4182ee8be2/causal_conv1d-1.7.0+cu.13.0.torch.2.13-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:a6257f387166ea282353cf519d27c771d31853aba4c7cdec292d9c4182ee8be2", size = 206976696, upload-time = "2026-10-03T17:53:33Z" },
-    { url = "https://wheels.astral.sh/artifacts/4c0bab20316cfb04a5590987a477768b79ba0a7c0234869d0ea4f99cb3f83916/causal_conv1d-1.7.0+cu.13.0.torch.2.13-cp314-cp314-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:4c0bab20316cfb04a5590987a477768b79ba0a7c0234869d0ea4f99cb3f83916", size = 206967769, upload-time = "2026-10-03T17:53:33Z" },
-    { url = "https://wheels.astral.sh/artifacts/3fe0d48e39fa0e1c8f47954a55f7c059fd451e95f719ff9a58f256acedaed51b/causal_conv1d-1.7.0+cu.13.0.torch.2.13-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:3fe0d48e39fa0e1c8f47954a55f7c059fd451e95f719ff9a58f256acedaed51b", size = 206976164, upload-time = "2026-10-03T17:53:34Z" },
-    { url = "https://wheels.astral.sh/artifacts/d322287ec5b22a072e54056fa8fb207fca8a06c3fc41a30a3ed3b78dd910fa70/causal_conv1d-1.7.0+cu.13.0.torch.2.13-cp315-cp315-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:d322287ec5b22a072e54056fa8fb207fca8a06c3fc41a30a3ed3b78dd910fa70", size = 206968478, upload-time = "2026-10-03T17:53:39Z" },
-    { url = "https://wheels.astral.sh/artifacts/7b34421f3277ef3696288717427d97baff4c9c66e45f9ba7f69f358ca4220315/causal_conv1d-1.7.0+cu.13.0.torch.2.13-cp315-cp315-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:7b34421f3277ef3696288717427d97baff4c9c66e45f9ba7f69f358ca4220315", size = 206978353, upload-time = "2026-10-03T17:53:42Z" },
+    { url = "https://wheels.astral.sh/artifacts/38b6d646c7f634cf77d45d66ba2ff76b30e1a00e6c46cfdf3443a214bc1a5e9e/causal_conv1d-1.7.0+cu.12.6.torch.2.13-cp313-cp313-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:38b6d646c7f634cf77d45d66ba2ff76b30e1a00e6c46cfdf3443a214bc1a5e9e", size = 112480053, upload-time = "2026-10-03T17:49:38Z" },
+    { url = "https://wheels.astral.sh/artifacts/f38aad0eb79b25c6b7cb1227043c9785d6ccdb658765aab61af318f6141bb311/causal_conv1d-1.7.0+cu.12.6.torch.2.13-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:f38aad0eb79b25c6b7cb1227043c9785d6ccdb658765aab61af318f6141bb311", size = 112513403, upload-time = "2026-10-03T17:49:39Z" },
+    { url = "https://wheels.astral.sh/artifacts/d44254ce63504946d18eeade9b320663c357814da7b6689cea03610d91c540bd/causal_conv1d-1.7.0+cu.12.6.torch.2.13-cp314-cp314-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:d44254ce63504946d18eeade9b320663c357814da7b6689cea03610d91c540bd", size = 112479762, upload-time = "2026-10-03T17:49:39Z" },
+    { url = "https://wheels.astral.sh/artifacts/32e20ba496c53ac1a1faeb4627b73e8dbf2f809460d532be4584152425796360/causal_conv1d-1.7.0+cu.12.6.torch.2.13-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:32e20ba496c53ac1a1faeb4627b73e8dbf2f809460d532be4584152425796360", size = 112513242, upload-time = "2026-10-03T17:49:42Z" },
+    { url = "https://wheels.astral.sh/artifacts/ae3c8a46d0706a869dccfe392bf188c1d50ae49affda20fd8e9644808b0178f1/causal_conv1d-1.7.0+cu.12.6.torch.2.13-cp315-cp315-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:ae3c8a46d0706a869dccfe392bf188c1d50ae49affda20fd8e9644808b0178f1", size = 112481386, upload-time = "2026-10-03T17:49:42Z" },
+    { url = "https://wheels.astral.sh/artifacts/3e506f291de4e382dbf1b998fb306a838304049c3e94656b9f65e3216d86e8fe/causal_conv1d-1.7.0+cu.12.6.torch.2.13-cp315-cp315-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:3e506f291de4e382dbf1b998fb306a838304049c3e94656b9f65e3216d86e8fe", size = 112517955, upload-time = "2026-10-03T17:49:43Z" },
 ]
 
 [[package]]
@@ -1405,6 +1405,7 @@ dependencies = [
     { name = "kernels" },
     { name = "torch" },
     { name = "torchaudio" },
+    { name = "torchcodec" },
     { name = "torchvision" },
     { name = "transformers" },
     { name = "vllm" },
@@ -1414,12 +1415,13 @@ dependencies = [
 requires-dist = [
     { name = "accelerate", specifier = ">=1.15.0" },
     { name = "av" },
-    { name = "causal-conv1d", specifier = "==1.7.0+cu.13.0.torch.2.13", index = "https://wheels.astral.sh/simple/cu130" },
+    { name = "causal-conv1d", specifier = "==1.7.0+cu.12.6.torch.2.13", index = "https://wheels.astral.sh/simple/cu126" },
     { name = "datasets" },
     { name = "flash-linear-attention", specifier = ">=0.5.2" },
     { name = "kernels", specifier = ">=0.17.2,<0.18" },
     { name = "torch", specifier = "==2.13.0", index = "https://download.pytorch.org/whl/cu126" },
     { name = "torchaudio", specifier = "==2.11.0", index = "https://download.pytorch.org/whl/cu126" },
+    { name = "torchcodec", specifier = "==0.17.0", index = "https://download.pytorch.org/whl/cu126" },
     { name = "torchvision", specifier = "==0.28.0", index = "https://download.pytorch.org/whl/cu126" },
     { name = "transformers", specifier = ">=5.20.1" },
     { name = "vllm", specifier = ">=0.30.0" },
@@ -5001,20 +5003,21 @@ wheels = [
 
 [[package]]
 name = "torchcodec"
-version = "0.17.0"
-source = { registry = "https://pypi.org/simple" }
+version = "0.17.0+cu126"
+source = { registry = "https://download.pytorch.org/whl/cu126" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/80/58/ff4d086c2b5e0807d1617b083eafcedebf8a9fbcabf2363ea8a92ad1c098/torchcodec-0.17.0-cp313-cp313-macosx_14_0_arm64.whl", hash = "sha256:509558ec5d4f431fe2411d8f57e8e4fd6772f799bd44e570946b66989853c402", size = 4219907, upload-time = "2026-09-30T12:53:02.677Z" },
-    { url = "https://files.pythonhosted.org/packages/8b/12/860dce5e7ef82879665ceeffd6f94e27fe51e390e66538205d8533311792/torchcodec-0.17.0-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b7a2a30f0372f4b0caae71a598c20e6d5ef7bf55dae2576003d6a6ffeccb9153", size = 8852117, upload-time = "2026-09-30T12:53:04.258Z" },
-    { url = "https://files.pythonhosted.org/packages/68/2f/11ed8af589bcac10e6de4801728d21e44a71492578b6bb3d423841de2141/torchcodec-0.17.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:9eb27bc90ad1d60fbded1415e8106961d5f9e4bc80b3010217cfe6a08ad967ce", size = 9973287, upload-time = "2026-09-30T12:53:06.288Z" },
-    { url = "https://files.pythonhosted.org/packages/cd/70/f0d7aa8e04ec12acfdb629f8c02a4bd3ec76186a6dc3002d2f6f1bdcb30f/torchcodec-0.17.0-cp313-cp313-win_amd64.whl", hash = "sha256:0af78216e6b2d13e33ecaa7b49bb06d6795cab39515449d40d2193cf1fa3e447", size = 6810219, upload-time = "2026-09-30T12:53:08.184Z" },
-    { url = "https://files.pythonhosted.org/packages/c7/e0/78fd92b246cc0a9a0800306d82a743ec990105310595b68698061964574e/torchcodec-0.17.0-cp314-cp314-macosx_14_0_arm64.whl", hash = "sha256:9567427ba28cee36704104f66bbaebfc210b89204fceb3063ca09a3fdeb0ac02", size = 4220040, upload-time = "2026-09-30T12:53:10.152Z" },
-    { url = "https://files.pythonhosted.org/packages/01/36/75ba1e9bb6b226dce3e1cc2f6a1f589885e71aa4b831e96d1b00b9a000fd/torchcodec-0.17.0-cp314-cp314-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:d9e682f91bc70a34a8c7ea3d302b3d6f52970b97c5b81aa098478197abf17fc6", size = 8853671, upload-time = "2026-09-30T12:53:11.75Z" },
-    { url = "https://files.pythonhosted.org/packages/f7/98/986613945043b8beefd482c32c68fe20d7b9c79f28a5bd4da78a4144184e/torchcodec-0.17.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:aa5cf864c6a3ee42fa45961ec469ae359fbca448fb3440b86c84c9f77dd130aa", size = 9973805, upload-time = "2026-09-30T12:53:13.748Z" },
-    { url = "https://files.pythonhosted.org/packages/86/59/c57bb24ffedebe1931be467371266234fb7292f462a4f65e0e4fe880ed9b/torchcodec-0.17.0-cp314-cp314-win_amd64.whl", hash = "sha256:916ff04f0accda465b6b33a9926d1b9daae6414e81abed5987b78c87374e6e8a", size = 6812058, upload-time = "2026-09-30T12:53:15.778Z" },
-    { url = "https://files.pythonhosted.org/packages/a1/38/e27754be64b351b99d16e146c27fe1c8ef0abdd92186d33282afbf81801e/torchcodec-0.17.0-cp314-cp314t-macosx_14_0_arm64.whl", hash = "sha256:7c6004dbeb27a9e58bad0b3d10b4d7f7cda4407c0f10ba45a5a2ebd60aa33dbe", size = 4223965, upload-time = "2026-09-30T12:53:17.46Z" },
-    { url = "https://files.pythonhosted.org/packages/3f/6e/838b73f42dcc8d892bba0b6f278f3ea7db577bce28b30b7306ae02224043/torchcodec-0.17.0-cp314-cp314t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:8806e967d598d0d8ff0214837d9fb7565f06c7676f56ec172d5c57574e59d5b8", size = 8858951, upload-time = "2026-09-30T12:53:19.286Z" },
-    { url = "https://files.pythonhosted.org/packages/a8/6a/3e1cad0310001fb50a222406f16c983c7bf1dbdbae73ae26c63288ddc308/torchcodec-0.17.0-cp314-cp314t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:7d58e5211ed6f04aca2bd57e6a6104f9993ceb36a290db31de3f4e6096148f0b", size = 9975758, upload-time = "2026-09-30T12:53:21.471Z" },
+    { url = "https://download.pytorch.org/whl/cu126/torchcodec-0.17.0%2Bcu126-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:462c477319a1aea334c4cbedd7c6d0148e2a699caeac5869c5e080400a65ae1b", upload-time = "2026-09-30T17:03:36Z" },
+    { url = "https://download.pytorch.org/whl/cu126/torchcodec-0.17.0%2Bcu126-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:243ad0e5745f889538925fde54844ee13845cf4e6c535cd9235b6ca6a6870066", upload-time = "2026-09-30T17:03:37Z" },
+    { url = "https://download.pytorch.org/whl/cu126/torchcodec-0.17.0%2Bcu126-cp313-cp313-win_amd64.whl", hash = "sha256:b749681aedc823cb4e661a4ca28478b4120fdbf68a0ac1c747aee3d231e4632e", upload-time = "2026-09-30T17:03:38Z" },
+    { url = "https://download.pytorch.org/whl/cu126/torchcodec-0.17.0%2Bcu126-cp314-cp314-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:d78ca8c371cb7a97a815d3ff3c6d895323b297fa0da649fb8b453fe9b213c9ca", upload-time = "2026-09-30T17:03:39Z" },
+    { url = "https://download.pytorch.org/whl/cu126/torchcodec-0.17.0%2Bcu126-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:356d7272e349ef5c93a55a7d20c1332af590e834fb6110b0602e870a3915fe43", upload-time = "2026-09-30T17:03:40Z" },
+    { url = "https://download.pytorch.org/whl/cu126/torchcodec-0.17.0%2Bcu126-cp314-cp314-win_amd64.whl", hash = "sha256:8dcf044edc1440bf34b2187eff87d08aef9574e9e5ce62acdf780c6dbbea1c56", upload-time = "2026-09-30T17:03:41Z" },
+    { url = "https://download.pytorch.org/whl/cu126/torchcodec-0.17.0%2Bcu126-cp314-cp314t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:3a80584e17fed64aa8b939ae9cf60384f1dbb5eba529c7fc0d2f42d3eb74eba9", upload-time = "2026-09-30T17:03:42Z" },
+    { url = "https://download.pytorch.org/whl/cu126/torchcodec-0.17.0%2Bcu126-cp314-cp314t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:2f0a76472ee2f30838d6bd5ed4e954a6ef63910ccf56012fadcb22417fcb3384", upload-time = "2026-09-30T17:03:43Z" },
+    { url = "https://download.pytorch.org/whl/cu126/torchcodec-0.17.0%2Bcu126-cp315-cp315-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:aa9978f4b00cbbb101a6f24bb7d735b3fcf40412b0ccf1bfedbeab34be5a04c1", upload-time = "2026-09-30T17:03:43Z" },
+    { url = "https://download.pytorch.org/whl/cu126/torchcodec-0.17.0%2Bcu126-cp315-cp315-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8154524cbeed8ce15ca34862b40607993783128ef4fc88d8bffa77b7d4120d59", upload-time = "2026-09-30T17:03:44Z" },
+    { url = "https://download.pytorch.org/whl/cu126/torchcodec-0.17.0%2Bcu126-cp315-cp315t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:325bba9f396b22e91e35262b1d452045ea7679acaeadea1ae1348032963a0a91", upload-time = "2026-09-30T17:03:44Z" },
+    { url = "https://download.pytorch.org/whl/cu126/torchcodec-0.17.0%2Bcu126-cp315-cp315t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:32683e40ed683f340af61c30b68addc5073922f46afaeccadb4b090f4760d15a", upload-time = "2026-09-30T17:03:45Z" },
 ]
 
 [[package]]
