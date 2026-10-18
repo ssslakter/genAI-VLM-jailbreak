@@ -1,0 +1,17 @@
+pyproject.toml
+  h_cec284cdd16cba 11-16,18
+  h_cec284cdd16cba 10,17
+uv.lock
+  h_cec284cdd16cba 1-5316
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8b66e32d7aaa8cfc53b403fc720928a69da4fee9",
+  "prompts": {},
+  "humans": {
+    "h_cec284cdd16cba": {
+      "author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
