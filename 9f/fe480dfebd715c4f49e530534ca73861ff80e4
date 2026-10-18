@@ -1,0 +1,40 @@
+experiments/order_check.py
+  s_d29284f3e861ea::t_130038537f7bf5 116
+  s_d29284f3e861ea::t_868b45944a40c1 7,11
+  s_d29284f3e861ea::t_507910d7356afd 44,47
+  s_d29284f3e861ea::t_f8dbf2538607a8 1-4,10,12-21,31,37-43,45-46,48-100,102-103,106-108,111,115,117-118,122-142
+  h_cec284cdd16cba 101
+  s_d29284f3e861ea::t_e5d7e24f012810 26-29
+  s_d29284f3e861ea::t_2f27009d25ec8e 119-121
+  s_d29284f3e861ea::t_cfea9005722509 5-6,8-9
+  s_d29284f3e861ea::t_56cf45798cd955 22-25,30,32-36
+  s_d29284f3e861ea::t_4004766f46abaa 104-105,109-110,112-114
+pyproject.toml
+  s_d29284f3e861ea::t_c09f3ecc688630 12
+  s_d29284f3e861ea::t_8c4aaba1a94eb7 13
+.gitignore
+  s_d29284f3e861ea::t_fb161e5b980b73 222-224
+uv.lock
+  s_d29284f3e861ea::t_0333946c834900 6-8,10-12,14-16,18-20,285-310,916-938,1327,1329,1331-1336,1345,1347,1357,1359,2420-2436,2570-2571,2586-2587,2658-2660,2662-2664,2678-2680,2682-2684,2693-2695,2697-2699,2713-2715,2717-2719,3240-3292,3541-3583,3920-3931,5071-5079,5428-5548
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9ffe480dfebd715c4f49e530534ca73861ff80e4",
+  "prompts": {},
+  "humans": {
+    "h_cec284cdd16cba": {
+      "author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_d29284f3e861ea": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2996e651-07a7-4651-9741-6d200fba6d0a",
+        "model": "grok-4.7"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
