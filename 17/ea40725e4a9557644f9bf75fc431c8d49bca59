@@ -1,0 +1,66 @@
+genai_vlm_jailbreak/generator/__main__.py
+  s_31904da6efe377::t_70733182ee7054 1-3
+genai_vlm_jailbreak/generator/events.py
+  s_31904da6efe377::t_743f07a92e9994 38-39,44-49
+  s_31904da6efe377::t_ddc3361fa91a8f 1-37,40-43,50-62
+pyproject.toml
+  s_9270a3cb0a13b2::t_c2b98a7c9cab18 11-12,26-28,33-54
+  s_9270a3cb0a13b2::t_30a854d33042bf 29-32
+  s_9270a3cb0a13b2::t_22fdb6ac9ca2a6 55-56
+  h_cec284cdd16cba 14,23-25
+  s_9270a3cb0a13b2::t_52b2b68117476f 13
+genai_vlm_jailbreak/generator/__init__.py
+  s_31904da6efe377::t_b963ec566e6994 1-2,4,7-11,15
+  h_cec284cdd16cba 3,5-6,12-14
+genai_vlm_jailbreak/generator/simulation.py
+  s_31904da6efe377::t_4d77e7c7b6803d 11-12
+  s_31904da6efe377::t_28db970a223541 101-103
+  s_31904da6efe377::t_b7d1b882c7319f 46,48,50
+  s_31904da6efe377::t_fe90d8eab30e5f 18-19,25
+  s_31904da6efe377::t_bdd240e9dcf0e2 1,3
+  s_31904da6efe377::t_284722e17aa943 28-29,35-38,42-43
+  s_31904da6efe377::t_426c8b4a8dfcf1 44,51
+  s_31904da6efe377::t_b3f9cb59da4d0d 15
+  s_31904da6efe377::t_a4f9540d6dbc32 2,9
+  s_31904da6efe377::t_4a70d0090e2e7b 63,66,69,73-78
+  s_31904da6efe377::t_ed8135b3eb4509 55
+  s_31904da6efe377::t_ab471126ebc421 39-40,45
+  s_31904da6efe377::t_17a97778d704fb 10
+  s_31904da6efe377::t_35f8252fa99604 13,22,26-27,30,34,41,47,49,52-54,56-62,67-68,70-72,81-91,94,96,100
+  s_31904da6efe377::t_395c928c2ed3a9 7
+  h_cec284cdd16cba 4-6,8,14,16-17,20-21,23-24,31-33,64-65,79-80,92-93,95,97-99
+genai_vlm_jailbreak/generator/shapes.py
+  s_31904da6efe377::t_db19196c3d7f18 1,6-23
+  s_31904da6efe377::t_f946a645ead139 2-5,24-217
+pixi.lock
+  h_cec284cdd16cba 1-4107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "17ea40725e4a9557644f9bf75fc431c8d49bca59",
+  "prompts": {},
+  "humans": {
+    "h_cec284cdd16cba": {
+      "author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_31904da6efe377": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d99f8640-30c7-4540-8e3c-3c03500c5e98",
+        "model": "grok-4.7"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    },
+    "s_9270a3cb0a13b2": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e8966cd3-ea0e-4f44-a819-18c0524f14d4",
+        "model": "grok-4.7"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
