@@ -8,41 +8,49 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "accelerate>=1.15.0",
-    "av",
-    "datasets",
-    "causal-conv1d==1.7.0+cu.12.6.torch.2.13",
-    "flash-linear-attention>=0.5.2",
-    "kernels>=0.17.2,<0.18",
-    "torch==2.13.0",
-    "torchaudio==2.11.0",
-    "torchcodec==0.17.0",
-    "torchvision==0.28.0",
-    "transformers>=5.20.1",
-    "vllm>=0.30.0",
+    "numpy",
+    "imageio",
+    "imageio-ffmpeg",
+    "pycairo",
 ]
-
 
 [project.scripts]
 genai-vlm-jailbreak = "genai_vlm_jailbreak:main"
 
-[[tool.uv.index]]
-name = "astral-cu126"
-url = "https://wheels.astral.sh/simple/cu126"
-explicit = true
-
-[[tool.uv.index]]
-name = "pytorch-cu126"
-url = "https://download.pytorch.org/whl/cu126"
-explicit = true
-
-[tool.uv.sources]
-causal-conv1d = { index = "astral-cu126" }
-torch = { index = "pytorch-cu126" }
-torchaudio = { index = "pytorch-cu126" }
-torchcodec = { index = "pytorch-cu126" }
-torchvision = { index = "pytorch-cu126" }
-
 [build-system]
 requires = ["uv_build>=0.13.1,<0.14.0"]
 build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = [
+    "linux-64",
+    { name = "linux-64-cuda", platform = "linux-64", cuda = "12.6" },
+]
+
+[tool.pixi.dependencies]
+python = "3.13.*"
+
+[tool.pixi.feature.train.dependencies]
+python = "3.13.*"
+
+[tool.pixi.feature.train.pypi-dependencies]
+accelerate = ">=1.15.0"
+av = "*"
+datasets = "*"
+causal-conv1d = { version = "==1.7.0+cu.12.6.torch.2.13", index = "https://wheels.astral.sh/simple/cu126" }
+flash-linear-attention = ">=0.5.2"
+kernels = ">=0.17.2,<0.18"
+torch = { version = "==2.13.0", index = "https://download.pytorch.org/whl/cu126" }
+torchaudio = { version = "==2.11.0", index = "https://download.pytorch.org/whl/cu126" }
+torchcodec = { version = "==0.17.0", index = "https://download.pytorch.org/whl/cu126" }
+torchvision = { version = "==0.28.0", index = "https://download.pytorch.org/whl/cu126" }
+transformers = ">=5.20.1"
+vllm = ">=0.30.0"
+
+[tool.pixi.environments]
+default = { platforms = ["linux-64"] }
+train = { features = ["train"], no-default-feature = true, solve-group = "train", platforms = ["linux-64-cuda"] }
