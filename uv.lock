@@ -3,12 +3,12 @@ revision = 5
 requires-python = ">=3.13"
 resolution-markers = [
     "python_full_version >= '3.14' and platform_machine == 's390x' and sys_platform == 'darwin'",
-    "python_full_version < '3.14' and platform_machine == 's390x' and sys_platform == 'darwin'",
     "python_full_version >= '3.14' and platform_machine == 's390x' and sys_platform != 'darwin'",
-    "python_full_version < '3.14' and platform_machine == 's390x' and sys_platform != 'darwin'",
     "python_full_version >= '3.14' and platform_machine != 's390x' and sys_platform == 'darwin'",
-    "python_full_version < '3.14' and platform_machine != 's390x' and sys_platform == 'darwin'",
     "python_full_version >= '3.14' and platform_machine != 's390x' and sys_platform != 'darwin'",
+    "python_full_version < '3.14' and platform_machine == 's390x' and sys_platform == 'darwin'",
+    "python_full_version < '3.14' and platform_machine == 's390x' and sys_platform != 'darwin'",
+    "python_full_version < '3.14' and platform_machine != 's390x' and sys_platform == 'darwin'",
     "python_full_version < '3.14' and platform_machine != 's390x' and sys_platform != 'darwin'",
 ]
 
@@ -363,14 +363,21 @@ wheels = [
 
 [[package]]
 name = "causal-conv1d"
-version = "1.7.0"
-source = { registry = "https://pypi.org/simple" }
+version = "1.7.0+cu.13.0.torch.2.13"
+source = { registry = "https://wheels.astral.sh/simple/cu130" }
 dependencies = [
     { name = "ninja" },
     { name = "packaging" },
     { name = "torch" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f4/d1/eba27735f31bd5527d39a3c7f693e6ded7b844cab275db719a15ad37b6cd/causal_conv1d-1.7.0.tar.gz", hash = "sha256:3202758494eaa7b597ce1c282dfa188889506bfcb92cad3c407d26736bfcd32b", size = 30328, upload-time = "2026-08-20T10:54:15.808Z" }
+wheels = [
+    { url = "https://wheels.astral.sh/artifacts/9b3ce786571bfe18e13db403465b3db695073131f0c167cc58eeadc9328c2c21/causal_conv1d-1.7.0+cu.13.0.torch.2.13-cp313-cp313-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:9b3ce786571bfe18e13db403465b3db695073131f0c167cc58eeadc9328c2c21", size = 206967830, upload-time = "2026-10-03T17:53:32Z" },
+    { url = "https://wheels.astral.sh/artifacts/a6257f387166ea282353cf519d27c771d31853aba4c7cdec292d9c4182ee8be2/causal_conv1d-1.7.0+cu.13.0.torch.2.13-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:a6257f387166ea282353cf519d27c771d31853aba4c7cdec292d9c4182ee8be2", size = 206976696, upload-time = "2026-10-03T17:53:33Z" },
+    { url = "https://wheels.astral.sh/artifacts/4c0bab20316cfb04a5590987a477768b79ba0a7c0234869d0ea4f99cb3f83916/causal_conv1d-1.7.0+cu.13.0.torch.2.13-cp314-cp314-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:4c0bab20316cfb04a5590987a477768b79ba0a7c0234869d0ea4f99cb3f83916", size = 206967769, upload-time = "2026-10-03T17:53:33Z" },
+    { url = "https://wheels.astral.sh/artifacts/3fe0d48e39fa0e1c8f47954a55f7c059fd451e95f719ff9a58f256acedaed51b/causal_conv1d-1.7.0+cu.13.0.torch.2.13-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:3fe0d48e39fa0e1c8f47954a55f7c059fd451e95f719ff9a58f256acedaed51b", size = 206976164, upload-time = "2026-10-03T17:53:34Z" },
+    { url = "https://wheels.astral.sh/artifacts/d322287ec5b22a072e54056fa8fb207fca8a06c3fc41a30a3ed3b78dd910fa70/causal_conv1d-1.7.0+cu.13.0.torch.2.13-cp315-cp315-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:d322287ec5b22a072e54056fa8fb207fca8a06c3fc41a30a3ed3b78dd910fa70", size = 206968478, upload-time = "2026-10-03T17:53:39Z" },
+    { url = "https://wheels.astral.sh/artifacts/7b34421f3277ef3696288717427d97baff4c9c66e45f9ba7f69f358ca4220315/causal_conv1d-1.7.0+cu.13.0.torch.2.13-cp315-cp315-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:7b34421f3277ef3696288717427d97baff4c9c66e45f9ba7f69f358ca4220315", size = 206978353, upload-time = "2026-10-03T17:53:42Z" },
+]
 
 [[package]]
 name = "cbor2"
@@ -1283,7 +1290,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "accelerate", specifier = ">=1.15.0" },
-    { name = "causal-conv1d", specifier = ">=1.7.0" },
+    { name = "causal-conv1d", specifier = "==1.7.0+cu.13.0.torch.2.13", index = "https://wheels.astral.sh/simple/cu130" },
     { name = "flash-linear-attention", specifier = ">=0.5.2" },
     { name = "kernels", specifier = ">=0.17.2,<0.18" },
     { name = "transformers", specifier = ">=5.20.1" },
@@ -2565,8 +2572,8 @@ version = "13.0.88"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.14' and platform_machine != 's390x' and sys_platform == 'darwin'",
-    "python_full_version < '3.14' and platform_machine != 's390x' and sys_platform == 'darwin'",
     "python_full_version >= '3.14' and platform_machine != 's390x' and sys_platform != 'darwin'",
+    "python_full_version < '3.14' and platform_machine != 's390x' and sys_platform == 'darwin'",
     "python_full_version < '3.14' and platform_machine != 's390x' and sys_platform != 'darwin'",
 ]
 wheels = [
@@ -2581,8 +2588,8 @@ version = "13.4.92"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.14' and platform_machine == 's390x' and sys_platform == 'darwin'",
-    "python_full_version < '3.14' and platform_machine == 's390x' and sys_platform == 'darwin'",
     "python_full_version >= '3.14' and platform_machine == 's390x' and sys_platform != 'darwin'",
+    "python_full_version < '3.14' and platform_machine == 's390x' and sys_platform == 'darwin'",
     "python_full_version < '3.14' and platform_machine == 's390x' and sys_platform != 'darwin'",
 ]
 
@@ -2592,8 +2599,8 @@ version = "13.0.96"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.14' and platform_machine != 's390x' and sys_platform == 'darwin'",
-    "python_full_version < '3.14' and platform_machine != 's390x' and sys_platform == 'darwin'",
     "python_full_version >= '3.14' and platform_machine != 's390x' and sys_platform != 'darwin'",
+    "python_full_version < '3.14' and platform_machine != 's390x' and sys_platform == 'darwin'",
     "python_full_version < '3.14' and platform_machine != 's390x' and sys_platform != 'darwin'",
 ]
 wheels = [
@@ -2608,8 +2615,8 @@ version = "13.4.92"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.14' and platform_machine == 's390x' and sys_platform == 'darwin'",
-    "python_full_version < '3.14' and platform_machine == 's390x' and sys_platform == 'darwin'",
     "python_full_version >= '3.14' and platform_machine == 's390x' and sys_platform != 'darwin'",
+    "python_full_version < '3.14' and platform_machine == 's390x' and sys_platform == 'darwin'",
     "python_full_version < '3.14' and platform_machine == 's390x' and sys_platform != 'darwin'",
 ]
 
