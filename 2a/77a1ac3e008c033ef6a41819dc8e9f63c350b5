@@ -1,0 +1,18 @@
+.python-version
+  h_cec284cdd16cba 1
+pyproject.toml
+  h_cec284cdd16cba 1-17
+src/genai_vlm_jailbreak/__init__.py
+  h_cec284cdd16cba 1-2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2a77a1ac3e008c033ef6a41819dc8e9f63c350b5",
+  "prompts": {},
+  "humans": {
+    "h_cec284cdd16cba": {
+      "author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
