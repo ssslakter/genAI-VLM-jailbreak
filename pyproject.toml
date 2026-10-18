@@ -15,6 +15,8 @@ dependencies = [
     "flash-linear-attention>=0.5.2",
     "kernels>=0.17.2,<0.18",
     "torch==2.13.0",
+    "torchaudio==2.11.0",
+    "torchvision==0.28.0",
     "transformers>=5.20.1",
     "vllm>=0.30.0",
 ]
@@ -36,6 +38,8 @@ explicit = true
 [tool.uv.sources]
 causal-conv1d = { index = "astral-cu130" }
 torch = { index = "pytorch-cu126" }
+torchaudio = { index = "pytorch-cu126" }
+torchvision = { index = "pytorch-cu126" }
 
 [build-system]
 requires = ["uv_build>=0.13.1,<0.14.0"]
