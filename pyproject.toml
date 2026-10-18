@@ -14,6 +14,7 @@ dependencies = [
     "causal-conv1d==1.7.0+cu.13.0.torch.2.13",
     "flash-linear-attention>=0.5.2",
     "kernels>=0.17.2,<0.18",
+    "torch==2.13.0",
     "transformers>=5.20.1",
     "vllm>=0.30.0",
 ]
@@ -27,8 +28,14 @@ name = "astral-cu130"
 url = "https://wheels.astral.sh/simple/cu130"
 explicit = true
 
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
 [tool.uv.sources]
 causal-conv1d = { index = "astral-cu130" }
+torch = { index = "pytorch-cu126" }
 
 [build-system]
 requires = ["uv_build>=0.13.1,<0.14.0"]
