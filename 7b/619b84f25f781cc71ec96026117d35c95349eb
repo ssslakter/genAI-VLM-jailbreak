@@ -1,0 +1,24 @@
+pyproject.toml
+  s_d29284f3e861ea::t_b18cb4ce2b83b4 42
+  s_d29284f3e861ea::t_c0508c2ec77579 19
+  s_d29284f3e861ea::t_c1c16a919e7df5 18
+  s_d29284f3e861ea::t_6ce6bacc10ebe2 41
+uv.lock
+  s_d29284f3e861ea::t_10698c025a4605 1407-1408,1422-1423,4985-4986,4988-4999,5022-5023,5030-5038
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7b619b84f25f781cc71ec96026117d35c95349eb",
+  "prompts": {},
+  "sessions": {
+    "s_d29284f3e861ea": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2996e651-07a7-4651-9741-6d200fba6d0a",
+        "model": "grok-4.7"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
