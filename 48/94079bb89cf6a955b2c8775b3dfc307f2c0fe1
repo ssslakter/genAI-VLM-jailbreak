@@ -1,0 +1,59 @@
+experiments/baseline/errors.py
+  s_d2956c746e1715::t_1ade95a9be00b2 8
+  s_d2956c746e1715::t_1d8dcf9334782b 7,12,14
+genai_vlm_jailbreak/generator/simulation.py
+  s_d2956c746e1715::t_1ae8c8b0642d01 123
+  s_d2956c746e1715::t_989a8115f35e43 145
+  s_d2956c746e1715::t_34bde183594283 9,14-18
+  s_d2956c746e1715::t_51d8e86a306b59 153,161,163
+experiments/baseline/prompts.py
+  s_d2956c746e1715::t_3394fea41f7836 3-10,15
+  s_d2956c746e1715::t_2a6a864acf8d2a 64
+  s_d2956c746e1715::t_73a3b61fba2e07 77-78,81,86-88,94-96,104-111
+  s_d2956c746e1715::t_d1c530d2e3f349 70-71,74
+genai_vlm_jailbreak/score.py
+  s_d2956c746e1715::t_b6831e708c645f 7-8,11,50-53,55,64-113,115-117,120-122,129-156,159-162,164-165
+experiments/baseline/run.py
+  s_d2956c746e1715::t_a730872b31dc07 3
+  s_d2956c746e1715::t_b03e965667e40b 11-12
+experiments/baseline/relaxed.py
+  s_d2956c746e1715::t_d13cbf32213c64 7-8
+genai_vlm_jailbreak/frames.py
+  s_d2956c746e1715::t_dc26109c059e39 1-29
+genai_vlm_jailbreak/generator/dataset.py
+  s_d2956c746e1715::t_d27bc4855c2c9c 68,70
+  s_d2956c746e1715::t_16dcaa854ca1da 11,14,16-22,24-64,69,84-86,96,114-118,123,140,145,147,149,151,189,191,199-200,204,214,265
+  s_d2956c746e1715::t_df7c2497e850af 12
+  s_d2956c746e1715::t_e44438ba1bb1d3 111
+  s_d2956c746e1715::t_ee20445ce92899 159
+genai_vlm_jailbreak/generator/events.py
+  s_d2956c746e1715::t_afe630dbc9ed9d 3
+  s_d2956c746e1715::t_1734628baf797a 5-6,8-9,19,22-23,30-39,43,48,57,59-61,68,70-71,81,88-92,108,112-118,124-133,136,139-140,144,149,151-152
+  s_d2956c746e1715::t_150b3dfcc6c082 13-15
+experiments/baseline/probe_tokens.py
+  s_d2956c746e1715::t_04c7972949d10b 7-8,15,19
+genai_vlm_jailbreak/generator/shapes.py
+  s_d2956c746e1715::t_e590831c211e42 22-29
+  s_d2956c746e1715::t_c3a854c585c2a7 59-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4894079bb89cf6a955b2c8775b3dfc307f2c0fe1",
+  "prompts": {},
+  "humans": {
+    "h_cec284cdd16cba": {
+      "author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_d2956c746e1715": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c9dd320b-ac39-4985-a24e-2780567be955",
+        "model": "grok-4.7"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
