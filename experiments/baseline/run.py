@@ -1,7 +1,6 @@
 """Ask Qwen3.5 to describe generated clips and score the reports against the sparse logs.
 
-We decode the frames ourselves and hand vLLM exactly the ones we want: given a file URL,
-vLLM's Qwen processor resamples to 2 fps, which leaves 4 frames of a 2 s clip.
+Frames are decoded and sampled in genai_vlm_jailbreak.frames, then handed to vLLM.
 """
 
 import argparse
@@ -9,27 +8,12 @@ import json
 import time
 from pathlib import Path
 
-import av
-import numpy as np
+from genai_vlm_jailbreak.frames import decode, sample
+from genai_vlm_jailbreak.score import parse, score, summarize
 
 from prompts import PROMPTS
-from score import parse, score, summarize
 
 MODEL = "Qwen/Qwen3.5-9B"
-
-
-def decode(path: Path) -> tuple[list[np.ndarray], float]:
-    with av.open(str(path)) as box:
-        stream = box.streams.video[0]
-        fps = float(stream.average_rate)
-        return [f.to_ndarray(format="rgb24") for f in box.decode(stream)], fps
-
-
-def sample(frames: list[np.ndarray], fps: float, n: int):
-    idx = np.linspace(0, len(frames) - 1, n).round().astype(int)
-    meta = {"fps": fps, "duration": len(frames) / fps, "total_num_frames": len(frames),
-            "frames_indices": idx.tolist(), "video_backend": "pyav", "do_sample_frames": False}
-    return np.stack([frames[i] for i in idx]), meta
 
 
 def clips(data: Path, limit: int, reverse: bool) -> list[tuple[str, Path, list[dict]]]:

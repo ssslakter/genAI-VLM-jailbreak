@@ -1,11 +1,18 @@
 """Prompt variants for the observer. Each returns the user text that follows the video."""
 
-_FORMAT = """Reply with a JSON list and nothing else. Each item has a time, in seconds, and an events array.
+from genai_vlm_jailbreak.generator.events import HEADINGS
+from genai_vlm_jailbreak.generator.shapes import SHAPES, Color
+
+_SHAPES = ", ".join(SHAPES)
+_COLORS = ", ".join(color.name.lower() for color in Color)
+_DIRECTIONS = ", ".join(HEADINGS)
+
+_FORMAT = f"""Reply with a JSON list and nothing else. Each item has a time, in seconds, and an events array.
 
 The first item has time 0.0 and lists every shape that is on screen at the start, each as still or moving.
 After that, add an item only when a shape is entering, exiting, or colliding, and list only the shapes doing that. Do not add items where shapes just keep moving.
 
-A shape entry has shape (circle, square, or triangle), color (red, blue, green, or yellow), and doing. doing is still, moving, entering, exiting, or colliding. moving, entering, and exiting include direction. colliding includes with, the other shape in the collision, and direction, where the shape moves after the hit; leave direction out if it stops. direction is one of east, northeast, north, northwest, west, southwest, south, southeast. East is screen-right and south is screen-down."""
+A shape entry has shape ({_SHAPES}), color ({_COLORS}), and doing. doing is still, moving, entering, exiting, or colliding. moving, entering, and exiting include direction. colliding includes with, the other shape in the collision, and direction, where the shape moves after the hit; leave direction out if it stops. direction is one of {_DIRECTIONS}. East is screen-right and south is screen-down."""
 
 _EXAMPLE = """Example response:
 
@@ -54,37 +61,39 @@ def inventory() -> str:
     ) + "\n\nBefore answering, check every frame for collisions: shapes that touch even once collide."
 
 
-_FORMAT4 = """Reply with a JSON list and nothing else. Each item has a time, in seconds, and an events array.
+_CLOSED = f"""Reply with a JSON list and nothing else. Each item has a time, in seconds, and an events array.
 
 The first item has time 0.0 and lists every shape that is on screen at the start, each as still or moving. Describe the start only: a shape that is not moving at the start is still, even if something hits it later.
 After that, add an item only when a shape is entering, exiting, or colliding, and list only the shapes doing that. Do not add items where shapes just keep moving.
 
 A shape entry has shape, color, and doing.
-- shape is exactly one of: circle, square, triangle. There are no other shapes. A square turned at an angle is still a square, never a diamond.
-- color is exactly one of: red, blue, green, yellow.
+- shape is exactly one of: {_SHAPES}. There are no other shapes. A square turned at an angle is still a square, never a diamond.
+- color is exactly one of: {_COLORS}.
 - doing is one of: still, moving, entering, exiting, colliding.
 moving, entering, and exiting include direction. colliding includes with, the other shape in the collision, and direction, where the shape moves after the hit; leave direction out if it stops. A shape that only drifts very slowly counts as still.
-direction is exactly one of: east (toward the right edge), west (toward the left edge), north (toward the top edge), south (toward the bottom edge). Pick the closest of the four."""
+direction is exactly one of: {_DIRECTIONS}. East is screen-right and south is screen-down. Pick the closest."""
 
 
-def strict() -> str:
+def closed() -> str:
+    """Closed lists of shapes, colors, and directions. Still is judged on the first frame."""
     return (
         "Watch the video of colored shapes on a white background. Describe only shapes that are "
-        "clearly on screen.\n\n" + _FORMAT4 + "\n\n" + _DEFINITIONS + "\n\nDo not mention a shape "
+        "clearly on screen.\n\n" + _CLOSED + "\n\n" + _DEFINITIONS + "\n\nDo not mention a shape "
         "that is off screen, and do not guess where it went.\n\n" + _EXAMPLE
     )
 
 
-def strict_inventory() -> str:
-    return strict().replace(
+def closed_inventory() -> str:
+    """closed, plus a pass over the whole clip before answering."""
+    return closed().replace(
         "Reply with a JSON list and nothing else.",
         "First look at the whole video. Reply with a JSON list and nothing else.",
     ) + "\n\nBefore answering, check every frame for collisions: shapes that touch even once collide."
 
 
-def strict_v2() -> str:
-    """strict_inventory with a start rule that does not push moving shapes toward still."""
-    return strict_inventory().replace(
+def half_second() -> str:
+    """closed_inventory, but still versus moving is judged over the first half second."""
+    return closed_inventory().replace(
         "Describe the start only: a shape that is not moving at the start is still, even if something hits it later.",
         "Judge each shape by how it moves during the first half second. A shape that moves then is moving, "
         "including a shape that is heading toward another shape. A shape that does not move then is still, "
@@ -92,5 +101,11 @@ def strict_v2() -> str:
     ).replace(" A shape that only drifts very slowly counts as still.", "")
 
 
-PROMPTS = {"base": base, "defined": defined, "inventory": inventory,
-           "strict": strict, "strict_inventory": strict_inventory, "strict_v2": strict_v2}
+PROMPTS = {
+    "base": base,
+    "defined": defined,
+    "inventory": inventory,
+    "closed": closed,
+    "closed_inventory": closed_inventory,
+    "half_second": half_second,
+}

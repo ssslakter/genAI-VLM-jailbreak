@@ -19,6 +19,14 @@ class Color(Enum):
         }[self]
 
 
+# Unit meshes, one corner at the origin. Circle has no vertices; its scale is a radius.
+SHAPES: dict[str, np.ndarray | None] = {
+    "triangle": np.array([(0, 0), (np.cos(np.pi / 3), np.sin(np.pi / 3)), (1, 0)], float),
+    "square": np.array([(0, 0), (1, 0), (1, 1), (0, 1)], float),
+    "circle": None,
+}
+
+
 class Shape(Protocol):
     pos: np.ndarray  # (2,)
     vel: np.ndarray  # (2,)
@@ -48,16 +56,10 @@ class ConvexPolygon(Shape):
         self.rotation = np.float64(0.0)
         self.color = color
         self.type = type
-        self._points = self._type2points(type)
-
-    @staticmethod
-    def _type2points(type: str) -> np.ndarray:
-        # local vertices, one corner at the origin; rectangle is 2x1 so it isn't a square
-        shapes = {
-            "triangle": [(0, 0), (np.cos(np.pi / 3), np.sin(np.pi / 3)), (1, 0)],
-            "square": [(0, 0), (1, 0), (1, 1), (0, 1)],
-        }
-        return np.array(shapes[type], float)
+        points = SHAPES[type]
+        if points is None:
+            raise ValueError(type)
+        self._points = points
 
     def intersects(self, other: Shape) -> bool:
         if isinstance(other, Circle):

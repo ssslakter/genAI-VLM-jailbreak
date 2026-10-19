@@ -4,15 +4,14 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from score import EVENTS, _events, _key, parse
-
-HEAD = ["east", "north", "west", "south"]
+from genai_vlm_jailbreak.generator.events import HEADINGS
+from genai_vlm_jailbreak.score import _events, _key, parse
 
 
 def gap(a, b):
-    if a not in HEAD or b not in HEAD:
+    if a not in HEADINGS or b not in HEADINGS:
         return "invalid"
-    d = abs(HEAD.index(a) - HEAD.index(b)) % 4
+    d = abs(HEADINGS.index(a) - HEADINGS.index(b)) % 4
     return {0: "0", 1: "90", 2: "180"}[min(d, 4 - d)]
 
 

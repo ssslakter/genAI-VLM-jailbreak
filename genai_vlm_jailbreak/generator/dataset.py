@@ -8,19 +8,66 @@ import imageio.v2 as iio
 import numpy as np
 from imageio.core.format import Format
 
-from .shapes import Circle, Color, ConvexPolygon, Shape, penetration
+from .events import STILL_SPEED, EventLog
+from .shapes import SHAPES, Circle, Color, ConvexPolygon, Shape, penetration
 
-_KINDS = ["triangle", "square", "circle"]
-_KIND_WEIGHT = {"triangle": 1, "square": 2, "circle": 3}
+_N_SHAPES = (2, 3, 4)
+
+# Lengths are fractions of the frame height. Speeds are frame-heights per second.
+# The frame is one unit tall; pixels appear only when the frame is drawn.
+SHAPE = 0.18  # circle diameter, square side, triangle base
+INSET = SHAPE  # a center this far inside is fully on screen
+SEPARATION = 1.6 * SHAPE
+OFFSCREEN = (SHAPE, 2 * SHAPE)
+ALONG_EDGE = (0.2, 0.8)
+
+APPROACH = (2 * SHAPE, 4 * SHAPE)  # how far a mover starts from its target
+ARRIVE = (0.4, 0.75)  # fraction of the clip that approach should take
+MAX_SPEED = 1.0  # one frame-height per second
+CRUISE = (0.25, 0.40)  # clearly moving, above the band the filter rejects
+
+AIM_NOISE = 0.15  # radians at aim 1; retries divide it so the shot gets straighter
+FREE_NOISE = 0.12  # radians, about 7° off the compass axis
+AIM_STEP = 0.35
+AIM_MAX = 5.0
+PLACE_TRIES = 80
+SCENE_TRIES = 40
+
+ENTER_CHANCE = 0.25
+AIM_AT_STILL = 0.7
+# Beta(a, b) for P(a shape is still). A collision scene leans higher so something sits there to hit.
+STILL_BETA = (3.2, 2.2)  # mean 0.59
+STILL_BETA_FREE = (2.2, 2.2)  # mean 0.50
+
+# Speeds in [STILL_SPEED, CLEAR_SPEED), or a heading this close to a diagonal, are a coin flip.
+CLEAR_SPEED = 2 * STILL_SPEED
+NEAR_DIAGONAL = 10.0
 
 
-# Circle was the largest; square and triangle grow a bit so the three read as one size.
-_SCALE = {"circle": 0.75, "square": 1.4, "triangle": 1.6}
+def unexplained(log: EventLog) -> bool:
+    """The picture changed and the label has no enter, exit, or collision for it."""
+    return bool(log.breaks)
+
+
+def ambiguous(log: EventLog) -> bool:
+    """A speed or a heading a viewer could honestly call either way."""
+    return any(_dubious(vel) for vel in log.velocities())
+
+
+def _dubious(vel: np.ndarray) -> bool:
+    speed = float(np.hypot(*vel))
+    if speed < STILL_SPEED:
+        return False
+    if speed < CLEAR_SPEED:
+        return True
+    angle = np.degrees(np.atan2(vel[1], vel[0])) % 90
+    return abs(angle - 45) < NEAR_DIAGONAL
 
 
 def _build(kind: str, color: Color, pos: np.ndarray, vel: np.ndarray, rotation: float) -> Shape:
-    scale = np.full(2, _SCALE[kind])
-    if kind == "circle":
+    extent = SHAPE / 2 if SHAPES[kind] is None else SHAPE
+    scale = np.full(2, extent)
+    if SHAPES[kind] is None:
         return Circle(pos, vel, scale, color)
     shape = ConvexPolygon(pos, vel, scale, kind, color)
     shape.rotation = np.float64(rotation)
@@ -34,9 +81,9 @@ def _compass(rng: np.random.Generator, slot: int, noise: float) -> np.ndarray:
 
 def _place(rng: np.random.Generator, span: np.ndarray, outside: bool) -> np.ndarray:
     if not outside:
-        return rng.uniform(1.6, span - 1.6)
-    pos = rng.uniform(0.2 * span, 0.8 * span)
-    gap = float(rng.uniform(1.7, 3.2))
+        return rng.uniform(INSET, span - INSET)
+    pos = rng.uniform(ALONG_EDGE[0] * span, ALONG_EDGE[1] * span)
+    gap = float(rng.uniform(*OFFSCREEN))
     side = int(rng.integers(4))
     axis = side % 2
     pos[axis] = -gap if side < 2 else span[axis] + gap
@@ -46,7 +93,7 @@ def _place(rng: np.random.Generator, span: np.ndarray, outside: bool) -> np.ndar
 def _crowded(positions: list[np.ndarray]) -> bool:
     for i, left in enumerate(positions):
         for right in positions[i + 1 :]:
-            if float(np.hypot(*(left - right))) < 2.4:
+            if float(np.hypot(*(left - right))) < SEPARATION:
                 return True
     return False
 
@@ -61,20 +108,19 @@ def sample_shapes(
     direction_slot: int = 0,
 ) -> list[Shape]:
     """Draw one scene. `aim` tightens paths toward or away from a hit."""
-    pairs = [(kind, color) for kind in _KINDS for color in Color]
-    weights = np.array([_KIND_WEIGHT[kind] for kind, _ in pairs], float)
-    weights /= weights.sum()
+    pairs = [(kind, color) for kind in SHAPES for color in Color]
     if n > len(pairs):
         raise ValueError("not enough distinct shape-color pairs")
-    static_p = float(rng.beta(3.2, 2.2) if want_collision else rng.beta(2.2, 2.2))
-    noise = 0.15 / aim
-    for _ in range(80):
-        picked = rng.choice(len(pairs), size=n, replace=False, p=weights)
+    beta = STILL_BETA if want_collision else STILL_BETA_FREE
+    static_p = float(rng.beta(*beta))
+    noise = AIM_NOISE / aim if want_collision else FREE_NOISE
+    for _ in range(PLACE_TRIES):
+        picked = rng.choice(len(pairs), size=n, replace=False)
         draft = []
         for index in picked:
             kind, color = pairs[int(index)]
             still = rng.random() < static_p
-            outside = want_collision and not still and rng.random() < 0.25
+            outside = want_collision and not still and rng.random() < ENTER_CHANCE
             pos = _place(rng, span, outside)
             draft.append([kind, color, pos, still, outside])
         if not any(item[3] and not item[4] for item in draft):
@@ -91,18 +137,18 @@ def sample_shapes(
             kind, color, pos, still, outside = item
             if still:
                 continue
-            heading = _compass(rng, slot, noise if want_collision else 0.12)
+            heading = _compass(rng, slot, noise)
             slot += 1
             if want_collision:
                 others = [i for i in range(n) if i != index]
                 resting = [i for i in others if draft[i][3]]
-                pool = resting if resting and rng.random() < 0.7 else others
+                pool = resting if resting and rng.random() < AIM_AT_STILL else others
                 target = draft[int(rng.choice(pool))][2]
-                dist = float(rng.uniform(3.2, 6.5))
+                dist = float(rng.uniform(*APPROACH))
                 item[2] = np.asarray(target, float) - heading * dist
-                speed = min(dist / (float(rng.uniform(0.4, 0.75)) * seconds), 8.0)
+                speed = min(dist / (float(rng.uniform(*ARRIVE)) * seconds), MAX_SPEED)
             else:
-                speed = float(rng.uniform(1.8, 3.2))
+                speed = float(rng.uniform(*CRUISE))
             item.append(heading * speed)
         positions = [item[2] for item in draft]
         if _crowded(positions):
@@ -110,7 +156,7 @@ def sample_shapes(
         shapes: list[Shape] = []
         for kind, color, pos, still, outside, *rest in draft:
             vel = np.zeros(2) if still else rest[0]
-            rotation = 0.0 if kind == "circle" else float(rng.uniform(0, 2 * np.pi))
+            rotation = 0.0 if SHAPES[kind] is None else float(rng.uniform(0, 2 * np.pi))
             shapes.append(_build(kind, color, pos, vel, rotation))
         if any(penetration(a, b) is not None for i, a in enumerate(shapes) for b in shapes[i + 1 :]):
             continue
@@ -140,9 +186,9 @@ def _produce(task: tuple[int, bool, int, str, int, int]) -> dict:
     rng = np.random.default_rng(seed)
     span = world_span(640, 480)
     aim = 1.0
-    n = (2, 3, 4)[index % 3]
+    n = _N_SHAPES[index % 3]
     accepted: list[Shape] | None = None
-    for _ in range(40):
+    for _ in range(SCENE_TRIES):
         shapes = sample_shapes(rng, span, n, want, seconds, aim, direction_slot=index)
         probe = Simulation(shapes=_clone(shapes), width=640, height=480)
         probe.run(fps=fps, seconds=seconds)
@@ -150,12 +196,12 @@ def _produce(task: tuple[int, bool, int, str, int, int]) -> dict:
             probe.collided() == want
             and not probe.grazes()
             and len(probe._fully_seen) == n
-            and not probe.sparse.unexplained
-            and not probe.sparse.ambiguous
+            and not unexplained(probe.log)
+            and not ambiguous(probe.log)
         ):
             accepted = shapes
             break
-        aim = min(5.0, aim + 0.35)
+        aim = min(AIM_MAX, aim + AIM_STEP)
     if accepted is None:
         return {"file": None, "index": index}
     path = Path(out_dir) / f"{index:05d}.mp4"
@@ -165,7 +211,7 @@ def _produce(task: tuple[int, bool, int, str, int, int]) -> dict:
     reversed_path = path.with_name(f"{index:05d}_rev.mp4")
     _write_reverse(path, reversed_path, fps)
     reversed_path.with_suffix(".json").write_text(
-        json.dumps(sim.sparse.backward(frames, fps), indent=2)
+        json.dumps(sim.log.backward(frames, fps), indent=2)
     )
     hit = sim.collided()
     return {
@@ -216,66 +262,4 @@ def generate(
     (out / "manifest.json").write_text(
         json.dumps({"counts": counts, "videos": rows}, indent=2)
     )
-    stats = summarize(out)
-    (out / "stats.json").write_text(json.dumps(stats, indent=2))
-    return {"counts": counts, "stats": stats}
-
-
-def summarize(out_dir: str | Path) -> dict:
-    """Statistics of the forward clips only. Reversed files are the mirror image."""
-    out = Path(out_dir)
-    logs = sorted(out.glob("[0-9][0-9][0-9][0-9][0-9].json"))
-    shape_count: dict[str, int] = {}
-    colors: dict[str, int] = {}
-    kinds: dict[str, int] = {}
-    directions: dict[str, int] = {}
-    collisions = 0
-    collision_videos = 0
-    entering = 0
-    exiting = 0
-    enter_videos = 0
-    exit_videos = 0
-    for path in logs:
-        moments = json.loads(path.read_text())
-        seen: set[tuple[str, str]] = set()
-        clip_enter = clip_exit = clip_hit = False
-        for moment in moments:
-            hit_here = 0
-            for row in moment["events"]:
-                seen.add((row["shape"], row["color"]))
-                doing = row["doing"]
-                if doing == "entering":
-                    entering += 1
-                    clip_enter = True
-                elif doing == "exiting":
-                    exiting += 1
-                    clip_exit = True
-                elif doing == "colliding":
-                    hit_here += 1
-                    clip_hit = True
-                if "direction" in row:
-                    directions[row["direction"]] = directions.get(row["direction"], 0) + 1
-            collisions += hit_here // 2
-        if clip_hit:
-            collision_videos += 1
-        if clip_enter:
-            enter_videos += 1
-        if clip_exit:
-            exit_videos += 1
-        shape_count[str(len(seen))] = shape_count.get(str(len(seen)), 0) + 1
-        for kind, color in seen:
-            kinds[kind] = kinds.get(kind, 0) + 1
-            colors[color] = colors.get(color, 0) + 1
-    return {
-        "forward_videos": len(logs),
-        "collision_videos": collision_videos,
-        "collisions": collisions,
-        "shapes_per_video": shape_count,
-        "shapes": kinds,
-        "colors": colors,
-        "directions": directions,
-        "entering": entering,
-        "exiting": exiting,
-        "videos_with_entering": enter_videos,
-        "videos_with_exiting": exit_videos,
-    }
+    return {"counts": counts}

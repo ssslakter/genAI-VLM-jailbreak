@@ -4,8 +4,9 @@ import random
 import sys
 from pathlib import Path
 
+from genai_vlm_jailbreak.score import _events, _key, parse, score, summarize
+
 from errors import gap
-from score import _events, _key, parse, score, summarize
 
 
 def relaxed(truth, pred):
