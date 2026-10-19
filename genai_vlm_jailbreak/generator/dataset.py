@@ -8,8 +8,10 @@ import imageio.v2 as iio
 import numpy as np
 from imageio.core.format import Format
 
+from . import simulation
 from .events import STILL_SPEED, EventLog
 from .shapes import SHAPES, Circle, Color, ConvexPolygon, Shape, penetration
+from .simulation import Simulation, world_span
 
 _N_SHAPES = (2, 3, 4)
 
@@ -167,6 +169,10 @@ def sample_shapes(
     raise RuntimeError("could not place shapes")
 
 
+# Simulation() with no shapes draws a scene. Bound here so simulation.py can import at top.
+simulation.sample_shapes = sample_shapes
+
+
 def _clone(shapes: list[Shape]) -> list[Shape]:
     cloned = []
     for shape in shapes:
@@ -183,8 +189,6 @@ def _clone(shapes: list[Shape]) -> list[Shape]:
 
 
 def _produce(task: tuple[int, bool, int, str, int, int]) -> dict:
-    from .simulation import Simulation, world_span
-
     index, want, seed, out_dir, seconds, fps = task
     rng = np.random.default_rng(seed)
     span = world_span(640, 480)

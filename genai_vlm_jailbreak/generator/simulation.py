@@ -9,6 +9,9 @@ from imageio.core.format import Format
 from .events import EventLog
 from .shapes import Circle, Color, ConvexPolygon, Shape, penetration
 
+# dataset.py assigns this once sample_shapes exists. Importing it here would cycle.
+sample_shapes = None
+
 
 def world_span(width: int, height: int) -> np.ndarray:
     """Frame in world units: one unit tall, width is the aspect ratio.
@@ -55,8 +58,8 @@ class Simulation:
             self._shown = {id(shape): self._inside(shape) for shape in self.shapes}
 
     def _init(self):
-        from .dataset import sample_shapes
-
+        if sample_shapes is None:
+            raise RuntimeError("import genai_vlm_jailbreak.generator.dataset before Simulation()")
         rng = np.random.default_rng(self.seed)
         want_collision = bool(rng.integers(2))
         self.shapes = sample_shapes(rng, self.span, self.n_shapes, want_collision, seconds=2)
