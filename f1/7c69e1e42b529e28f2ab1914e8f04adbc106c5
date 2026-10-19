@@ -1,0 +1,69 @@
+genai_vlm_jailbreak/generator/simulation.py
+  s_31904da6efe377::t_d96fa28cc5e194 57
+  s_31904da6efe377::t_4a4c5d938bf465 50,58,60-69
+  s_31904da6efe377::t_c8776dff9a3ae5 99-115
+  s_31904da6efe377::t_57b0e1424c5b7f 132-136,138
+  s_31904da6efe377::t_7a08cf6a7938ad 95,98
+  s_31904da6efe377::t_4d3658c5a77f8b 43
+  s_31904da6efe377::t_38d7631bdfa172 131,137,140-144,147
+  s_31904da6efe377::t_8b6e912ce13a45 27
+  s_31904da6efe377::t_07fb3ad6d6a73a 44-45
+  s_31904da6efe377::t_cc20456f4944fb 88,90-92,94,96-97
+  s_31904da6efe377::t_ba4a2f3b91c00d 13-16
+  s_31904da6efe377::t_5cbf558f951955 19-24
+  s_31904da6efe377::t_7739eb9a3f6ba7 46-49
+  s_31904da6efe377::t_d2f3e3c7de834d 39-42,53-54,56,59
+genai_vlm_jailbreak/generator/__init__.py
+  s_31904da6efe377::t_60068475e4dc31 11
+  s_31904da6efe377::t_8d2c766781dade 3,7-10,12-13,15
+genai_vlm_jailbreak/generator/events.py
+  s_31904da6efe377::t_a99edbff84d558 30-62
+  s_31904da6efe377::t_e200d0cbd185ae 64-65,68,70-83,89-91,94-96,98,103,105-107,109-117
+  s_31904da6efe377::t_ead2f62bfbd24d 85-86,88,92-93,97,99-102
+genai_vlm_jailbreak/__init__.py
+  s_31904da6efe377::t_79bb2d9a70e83d 2-4
+genai_vlm_jailbreak/generator/dataset.py
+  s_31904da6efe377::t_a76e9787ede494 133
+  s_31904da6efe377::t_ca020888adbab6 144,147
+  s_31904da6efe377::t_1b5a917fc70b5a 15
+  s_31904da6efe377::t_32536b38afbc52 210-272
+  s_31904da6efe377::t_50ce4e91823ba4 185
+  s_31904da6efe377::t_e172edba576071 159-178
+  s_31904da6efe377::t_7f1c02210b5b9c 5
+  s_31904da6efe377::t_6d2d2cb28d0a91 18-23,26-33
+  s_31904da6efe377::t_313973fb01b5ce 78-79
+  s_31904da6efe377::t_c5377f68b76367 66-67,73,81-85
+  s_31904da6efe377::t_6c350443909a69 137,140,142-143,145-146,148-149,152-158,181-184,186-209
+  s_31904da6efe377::t_f5f5b9e5bc5738 150
+  s_31904da6efe377::t_01fb6ea495e47d 38
+  s_31904da6efe377::t_e38557e585e273 90-92,94-97,102-104,106-115
+  s_31904da6efe377::t_f8eb373608e0bb 62
+  s_31904da6efe377::t_44c1fda21c2327 71
+  s_31904da6efe377::t_62d23749a4b281 87-89
+  s_31904da6efe377::t_f761b4f417d036 7,9,11
+  s_31904da6efe377::t_df220393810651 1,4,6,8,10,12-14,16-17,24-25,34-37,39-61,63-65,68-70,72,74-77,80,86,93,98-101,105,116-132,134-136,138-139,141,151,179-180
+  s_31904da6efe377::t_b9cf6cbdc39c9e 2-3
+.gitignore
+  s_31904da6efe377::t_2308c8a7274c11 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f17c69e1e42b529e28f2ab1914e8f04adbc106c5",
+  "prompts": {},
+  "humans": {
+    "h_cec284cdd16cba": {
+      "author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_31904da6efe377": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d99f8640-30c7-4540-8e3c-3c03500c5e98",
+        "model": "grok-4.7"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
