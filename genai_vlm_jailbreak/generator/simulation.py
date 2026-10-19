@@ -6,12 +6,16 @@ import cairo
 import imageio.v2 as iio
 from imageio.core.format import Format
 
-from .events import EventLog, SparseLog
+from .events import EventLog
 from .shapes import Circle, Color, ConvexPolygon, Shape, penetration
 
 
 def world_span(width: int, height: int) -> np.ndarray:
-    return np.array([width / height, 1.0]) / 0.12
+    """Frame in world units: one unit tall, width is the aspect ratio.
+
+    Drawing multiplies by the pixel height, so speeds stay in frame-heights per second.
+    """
+    return np.array([width / height, 1.0])
 
 
 class Simulation:
@@ -36,7 +40,6 @@ class Simulation:
         self.shapes: list[Shape] = []
         self.time = 0.0
         self.log = EventLog()
-        self.sparse = SparseLog()
         self.frame_index = 0
         self._frame = ConvexPolygon(
             self.span / 2, np.zeros(2), self.span, "square", Color.RED
@@ -117,8 +120,7 @@ class Simulation:
                 visible_fresh.append((left, right))
             elif id(left) in mention or id(right) in mention:
                 hidden_hits = True
-        self.log.observe(self.time, self.shapes, self._shown, mention, visible_fresh)
-        self.sparse.observe(
+        self.log.observe(
             self.frame_index, self.shapes, before, self._shown, mention, visible_fresh, hidden_hits
         )
         self._mention = mention
@@ -140,11 +142,7 @@ class Simulation:
         self.frame_ = np.array(bgra[:, :, 2::-1])
 
     def collided(self) -> bool:
-        return any(
-            row.get("doing") == "colliding"
-            for moment in self.log.events
-            for row in moment["events"]
-        )
+        return any(record["doing"] == "colliding" for record in self.log.records)
 
     def run(self, out_fname: str | None = None, fps: int = 30, seconds: int = 2):
         self.dt = 1 / fps
@@ -152,7 +150,7 @@ class Simulation:
         if out_fname is None:
             for _ in range(frames):
                 self.step()
-            self.sparse.finish(self.shapes, self._mention)
+            self.log.finish(self.shapes, self._mention)
             return
         with iio.get_writer(out_fname, fps=fps) as out:
             writer = cast(Format.Writer, out)
@@ -160,7 +158,6 @@ class Simulation:
                 self.step()
                 self.render()
                 writer.append_data(self.frame_)
-        self.sparse.finish(self.shapes, self._mention)
+        self.log.finish(self.shapes, self._mention)
         path = Path(out_fname)
-        path.with_suffix(".json").write_text(json.dumps(self.sparse.forward(fps), indent=2))
-        path.with_name(path.stem + "_dense.json").write_text(json.dumps(self.log.events, indent=2))
+        path.with_suffix(".json").write_text(json.dumps(self.log.forward(fps), indent=2))
