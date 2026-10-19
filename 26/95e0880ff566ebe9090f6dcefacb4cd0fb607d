@@ -1,0 +1,43 @@
+genai_vlm_jailbreak/generator/dataset.py
+  s_d2956c746e1715::t_7df49ba568795d 111-115,120-121,123-124
+experiments/baseline/relaxed.py
+  s_d2956c746e1715::t_cb667cf41459b9 18-19,21,25,30
+  s_d2956c746e1715::t_2d8d9a67202e9e 7
+  s_d2956c746e1715::t_aab4de316904b5 12,15,17,23-24,27
+  s_d2956c746e1715::t_6b9cd9f922e36b 47-48
+  s_d2956c746e1715::t_08397149fd3e77 41-42
+experiments/baseline/errors.py
+  s_d2956c746e1715::t_351d474957ee12 8
+  s_d2956c746e1715::t_e8985ba02080cc 29-31,34,39-40,43
+  s_d2956c746e1715::t_2dd2584280989e 24,27-28,35-37,42
+genai_vlm_jailbreak/score.py
+  s_d2956c746e1715::t_d40c2c0e017d3f 1-4,35-49,51-66,69-70,72-73,98-103,114-115,119,128
+  s_d2956c746e1715::t_9868a0e2bfc97a 5,10,14-34,50,67-68,71,74-80,83-84,86-97,104-113,116-118,120-127,129-148,150-188,193,198,200,204,211,213-214,217,223-224,228,231
+experiments/baseline/order_check.py
+  h_cec284cdd16cba 1-146
+experiments/baseline/run.py
+  s_d2956c746e1715::t_44e07e089fbb5d 80
+  s_d2956c746e1715::t_255d8f756ab17e 12
+  s_d2956c746e1715::t_bd229c216d18a1 75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2695e0880ff566ebe9090f6dcefacb4cd0fb607d",
+  "prompts": {},
+  "humans": {
+    "h_cec284cdd16cba": {
+      "author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_d2956c746e1715": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c9dd320b-ac39-4985-a24e-2780567be955",
+        "model": "grok-4.7"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
