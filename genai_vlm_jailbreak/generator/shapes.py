@@ -9,8 +9,6 @@ class Color(Enum):
     BLUE = 2
     GREEN = 3
     YELLOW = 4
-    PURPLE = 5
-    ORANGE = 6
 
     def rgb(self) -> tuple[int, int, int]:
         return {
@@ -18,8 +16,6 @@ class Color(Enum):
             Color.BLUE: (72, 146, 232),
             Color.GREEN: (80, 200, 120),
             Color.YELLOW: (242, 210, 72),
-            Color.PURPLE: (178, 114, 220),
-            Color.ORANGE: (242, 154, 64),
         }[self]
 
 

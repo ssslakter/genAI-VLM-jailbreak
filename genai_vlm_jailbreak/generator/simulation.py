@@ -10,12 +10,21 @@ from .events import EventLog
 from .shapes import Circle, Color, ConvexPolygon, Shape, penetration
 
 
+def world_span(width: int, height: int) -> np.ndarray:
+    return np.array([width / height, 1.0]) / 0.12
+
+
 class Simulation:
     def __init__(
-        self, width: int = 640, height: int = 480, n_shapes: int = 3, seed: int = 42
+        self,
+        width: int = 640,
+        height: int = 480,
+        n_shapes: int = 3,
+        seed: int = 42,
+        shapes: list[Shape] | None = None,
     ):
         self.w, self.h = width, height
-        self.span = np.array([width / height, 1.0]) / 0.12
+        self.span = world_span(width, height)
         self.draw_scale = self.h / self.span[1]
         self.n_shapes = n_shapes
         self.seed = seed
@@ -27,27 +36,37 @@ class Simulation:
         self.shapes: list[Shape] = []
         self.time = 0.0
         self.log = EventLog()
-        self._init()
+        self._frame = ConvexPolygon(
+            self.span / 2, np.zeros(2), self.span, "square", Color.RED
+        )
+        self._shown: dict[int, bool] = {}
+        self._contacts: set[tuple[int, int]] = set()
+        self._edge: set[int] = set()
+        self._fully_seen: set[int] = set()
+        if shapes is None:
+            self._init()
+        else:
+            self.shapes = shapes
+            self._shown = {id(shape): self._inside(shape) for shape in self.shapes}
 
     def _init(self):
+        from .dataset import sample_shapes
+
         rng = np.random.default_rng(self.seed)
-        kinds = ["triangle", "square", "circle"]
-        pairs = [(kind, color) for kind in kinds for color in Color]
-        if self.n_shapes > len(pairs):
-            raise ValueError("not enough distinct shape-color pairs")
-        picked = rng.choice(len(pairs), size=self.n_shapes, replace=False)
-        margin = 1.0
-        low, high = margin, self.span - margin
-        self.shapes = []
-        for index in picked:
-            kind, color = pairs[index]
-            pos = rng.uniform(low, high)
-            vel = rng.uniform(-0.4, 0.4, size=2) * self.span[1]
-            scale = np.ones(2)
-            if kind == "circle":
-                self.shapes.append(Circle(pos, vel, scale, color))
-            else:
-                self.shapes.append(ConvexPolygon(pos, vel, scale, kind, color))
+        want_collision = bool(rng.integers(2))
+        self.shapes = sample_shapes(rng, self.span, self.n_shapes, want_collision, seconds=2)
+        self._shown = {id(shape): self._inside(shape) for shape in self.shapes}
+
+    def _inside(self, shape: Shape) -> bool:
+        if isinstance(shape, Circle):
+            return bool(
+                np.all(shape.pos - shape.scale >= 0) and np.all(shape.pos + shape.scale <= self.span)
+            )
+        points = shape.points
+        return bool(np.all(points >= 0) and np.all(points <= self.span))
+
+    def grazes(self) -> bool:
+        return any(mark not in self._fully_seen for mark in self._edge)
 
     def _bounce(self, a: Shape, b: Shape):
         hit = penetration(a, b)
@@ -63,18 +82,37 @@ class Simulation:
         return True
 
     def step(self):
-        self.log.motions(self.time, self.shapes)
         for shape in self.shapes:
             shape.step(self.dt)
         touching: set[tuple[int, int]] = set()
+        fresh: list[tuple[Shape, Shape]] = []
         for _ in range(4):
-            for i, a in enumerate(self.shapes):
-                for b in self.shapes[i + 1 :]:
-                    if not self._bounce(a, b):
+            for i, left in enumerate(self.shapes):
+                for right in self.shapes[i + 1 :]:
+                    if not self._bounce(left, right):
                         continue
-                    touching.add(tuple(sorted((id(a), id(b)))))
-                    self.log.collision(self.time, a, b)
-        self.log.finish_contacts(touching)
+                    key = tuple(sorted((id(left), id(right))))
+                    if key not in touching and key not in self._contacts:
+                        fresh.append((left, right))
+                    touching.add(key)
+        self._contacts = touching
+        inside = {id(shape): self._inside(shape) for shape in self.shapes}
+        mention: dict[int, bool] = {}
+        visible_fresh: list[tuple[Shape, Shape]] = []
+        for shape in self.shapes:
+            mark = id(shape)
+            on_edge = penetration(shape, self._frame) is not None and not inside[mark]
+            if on_edge:
+                self._edge.add(mark)
+            if inside[mark]:
+                self._fully_seen.add(mark)
+            if inside[mark] or (self._shown.get(mark, False) and on_edge):
+                mention[mark] = inside[mark]
+        for left, right in fresh:
+            if id(left) in mention and id(right) in mention:
+                visible_fresh.append((left, right))
+        self.log.observe(self.time, self.shapes, self._shown, mention, visible_fresh)
+        self._shown = inside
         self.time += self.dt
 
     def render(self):
@@ -90,11 +128,23 @@ class Simulation:
         )
         self.frame_ = np.array(bgra[:, :, 2::-1])
 
-    def run(self, out_fname: str, fps: int = 30, seconds: int = 5):
+    def collided(self) -> bool:
+        return any(
+            row.get("doing") == "colliding"
+            for moment in self.log.events
+            for row in moment["events"]
+        )
+
+    def run(self, out_fname: str | None = None, fps: int = 30, seconds: int = 2):
         self.dt = 1 / fps
+        frames = fps * seconds
+        if out_fname is None:
+            for _ in range(frames):
+                self.step()
+            return
         with iio.get_writer(out_fname, fps=fps) as out:
             writer = cast(Format.Writer, out)
-            for _ in range(fps * seconds):
+            for _ in range(frames):
                 self.step()
                 self.render()
                 writer.append_data(self.frame_)

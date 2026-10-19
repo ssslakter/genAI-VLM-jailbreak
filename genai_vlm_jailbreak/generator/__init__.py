@@ -1,14 +1,18 @@
 import argparse
-import random
 
-from .simulation import Simulation
+from .dataset import generate
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Write one random shape video")
-    parser.add_argument("-o", "--output", default="shapes.mp4")
+    parser = argparse.ArgumentParser(description="Write a balanced set of shape videos")
+    parser.add_argument("-o", "--out", default="dataset")
+    parser.add_argument("-n", "--count", type=int, default=50)
+    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--seconds", type=int, default=2)
+    parser.add_argument("--fps", type=int, default=30)
+    parser.add_argument("--jobs", type=int, default=0, help="worker processes, 0 uses every core")
     args = parser.parse_args()
-    Simulation(seed=random.randrange(2**31)).run(args.output)
+    print(generate(args.out, args.count, args.seed, args.seconds, args.fps, args.jobs))
 
 
 if __name__ == "__main__":
