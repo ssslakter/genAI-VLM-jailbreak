@@ -33,6 +33,7 @@ platforms = [
 
 [tool.pixi.dependencies]
 python = "3.13.*"
+pycairo = "*"
 
 [tool.pixi.feature.train.dependencies]
 python = "3.13.*"

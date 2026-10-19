@@ -6,7 +6,7 @@ import cairo
 import imageio.v2 as iio
 from imageio.core.format import Format
 
-from .events import EventLog
+from .events import EventLog, SparseLog
 from .shapes import Circle, Color, ConvexPolygon, Shape, penetration
 
 
@@ -36,6 +36,8 @@ class Simulation:
         self.shapes: list[Shape] = []
         self.time = 0.0
         self.log = EventLog()
+        self.sparse = SparseLog()
+        self.frame_index = 0
         self._frame = ConvexPolygon(
             self.span / 2, np.zeros(2), self.span, "square", Color.RED
         )
@@ -82,6 +84,7 @@ class Simulation:
         return True
 
     def step(self):
+        before = {id(shape): shape.vel.copy() for shape in self.shapes}
         for shape in self.shapes:
             shape.step(self.dt)
         touching: set[tuple[int, int]] = set()
@@ -99,6 +102,7 @@ class Simulation:
         inside = {id(shape): self._inside(shape) for shape in self.shapes}
         mention: dict[int, bool] = {}
         visible_fresh: list[tuple[Shape, Shape]] = []
+        hidden_hits = False
         for shape in self.shapes:
             mark = id(shape)
             on_edge = penetration(shape, self._frame) is not None and not inside[mark]
@@ -111,7 +115,14 @@ class Simulation:
         for left, right in fresh:
             if id(left) in mention and id(right) in mention:
                 visible_fresh.append((left, right))
+            elif id(left) in mention or id(right) in mention:
+                hidden_hits = True
         self.log.observe(self.time, self.shapes, self._shown, mention, visible_fresh)
+        self.sparse.observe(
+            self.frame_index, self.shapes, before, self._shown, mention, visible_fresh, hidden_hits
+        )
+        self._mention = mention
+        self.frame_index += 1
         self._shown = inside
         self.time += self.dt
 
@@ -141,6 +152,7 @@ class Simulation:
         if out_fname is None:
             for _ in range(frames):
                 self.step()
+            self.sparse.finish(self.shapes, self._mention)
             return
         with iio.get_writer(out_fname, fps=fps) as out:
             writer = cast(Format.Writer, out)
@@ -148,6 +160,7 @@ class Simulation:
                 self.step()
                 self.render()
                 writer.append_data(self.frame_)
-        Path(out_fname).with_suffix(".json").write_text(
-            json.dumps(self.log.events, indent=2)
-        )
+        self.sparse.finish(self.shapes, self._mention)
+        path = Path(out_fname)
+        path.with_suffix(".json").write_text(json.dumps(self.sparse.forward(fps), indent=2))
+        path.with_name(path.stem + "_dense.json").write_text(json.dumps(self.log.events, indent=2))

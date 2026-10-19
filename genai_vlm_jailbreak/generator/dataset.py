@@ -8,7 +8,6 @@ import imageio.v2 as iio
 import numpy as np
 from imageio.core.format import Format
 
-from .events import reverse_log
 from .shapes import Circle, Color, ConvexPolygon, Shape, penetration
 
 _KINDS = ["triangle", "square", "circle"]
@@ -29,7 +28,7 @@ def _build(kind: str, color: Color, pos: np.ndarray, vel: np.ndarray, rotation: 
 
 
 def _compass(rng: np.random.Generator, slot: int, noise: float) -> np.ndarray:
-    angle = (slot % 8) * (np.pi / 4) + float(rng.normal(0, noise))
+    angle = (slot % 4) * (np.pi / 2) + float(rng.normal(0, noise))
     return np.array([np.cos(angle), np.sin(angle)])
 
 
@@ -147,20 +146,27 @@ def _produce(task: tuple[int, bool, int, str, int, int]) -> dict:
         shapes = sample_shapes(rng, span, n, want, seconds, aim, direction_slot=index)
         probe = Simulation(shapes=_clone(shapes), width=640, height=480)
         probe.run(fps=fps, seconds=seconds)
-        if probe.collided() == want and not probe.grazes() and len(probe._fully_seen) == n:
+        if (
+            probe.collided() == want
+            and not probe.grazes()
+            and len(probe._fully_seen) == n
+            and not probe.sparse.unexplained
+            and not probe.sparse.ambiguous
+        ):
             accepted = shapes
             break
         aim = min(5.0, aim + 0.35)
     if accepted is None:
-        accepted = shapes
-    path = Path(out_dir) / f"{index:03d}.mp4"
+        return {"file": None, "index": index}
+    path = Path(out_dir) / f"{index:05d}.mp4"
     sim = Simulation(shapes=accepted, width=640, height=480)
     sim.run(str(path), fps=fps, seconds=seconds)
     frames = fps * seconds
-    reversed_path = path.with_name(f"{index:03d}_rev.mp4")
+    reversed_path = path.with_name(f"{index:05d}_rev.mp4")
     _write_reverse(path, reversed_path, fps)
-    reversed_log = reverse_log(sim.log.events, frames, fps)
-    reversed_path.with_suffix(".json").write_text(json.dumps(reversed_log, indent=2))
+    reversed_path.with_suffix(".json").write_text(
+        json.dumps(sim.sparse.backward(frames, fps), indent=2)
+    )
     hit = sim.collided()
     return {
         "file": path.name,
@@ -196,6 +202,9 @@ def generate(
     with get_context("spawn").Pool(workers) as pool:
         rows = []
         for row in pool.imap_unordered(_produce, tasks):
+            if row["file"] is None:
+                print(f"{row['index']:05d} dropped: no clean scene", flush=True)
+                continue
             label = "hit" if row["collision"] else "miss"
             print(f"{row['file']} {label} n={row['n_shapes']}", flush=True)
             rows.append(row)
@@ -215,7 +224,7 @@ def generate(
 def summarize(out_dir: str | Path) -> dict:
     """Statistics of the forward clips only. Reversed files are the mirror image."""
     out = Path(out_dir)
-    logs = sorted(out.glob("[0-9][0-9][0-9].json"))
+    logs = sorted(out.glob("[0-9][0-9][0-9][0-9][0-9].json"))
     shape_count: dict[str, int] = {}
     colors: dict[str, int] = {}
     kinds: dict[str, int] = {}
