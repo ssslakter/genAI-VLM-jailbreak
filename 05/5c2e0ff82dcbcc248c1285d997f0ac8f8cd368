@@ -1,0 +1,55 @@
+genai_vlm_jailbreak/generator/dataset.py
+  s_b853b1dc85d979::t_1ee34ee38e0031 11,14
+  s_b853b1dc85d979::t_35a4c5b32bf426 172-175
+experiments/baseline/relaxed.py
+  s_b853b1dc85d979::t_e959b10b5d2d64 59-60
+  s_b853b1dc85d979::t_68bf048768b2c8 12,14-20,30,39
+  s_b853b1dc85d979::t_3d51c78500f0ce 13
+genai_vlm_jailbreak/frames.py
+  s_b853b1dc85d979::t_edcba83612b20b 8
+genai_vlm_jailbreak/generator/events.py
+  s_b853b1dc85d979::t_6f486e8a4c3ddf 93
+  s_b853b1dc85d979::t_d1e2b3036cb081 129
+  s_b853b1dc85d979::t_8c552293b4cb10 56-60,62
+experiments/baseline/run.py
+  s_b853b1dc85d979::t_fcfad493357191 11-12
+genai_vlm_jailbreak/__init__.py
+  s_b853b1dc85d979::t_085706ce3b5f67 1-2,4
+experiments/README.md
+  s_9de3cfe40b79d3::t_788db0147cda78 1-11
+README.md
+  s_9de3cfe40b79d3::t_45055873046561 1-29
+experiments/baseline/README.md
+  s_9de3cfe40b79d3::t_2832fe9759bfd1 1-17
+experiments/triggers/README.md
+  s_9de3cfe40b79d3::t_eb6d7cf015fc94 1-18
+LICENSE
+  s_9de3cfe40b79d3::t_2a4edddf3b92ad 1-21
+genai_vlm_jailbreak/generator/simulation.py
+  s_b853b1dc85d979::t_c1f857e0aaf75c 12-14
+  s_b853b1dc85d979::t_5a49bdcbd1074c 61-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "055c2e0ff82dcbcc248c1285d997f0ac8f8cd368",
+  "prompts": {},
+  "sessions": {
+    "s_9de3cfe40b79d3": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7ecc5655-b05f-490c-92b1-96570dfbea7d",
+        "model": "grok-4.7"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    },
+    "s_b853b1dc85d979": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1045b5e0-636e-48c1-a7eb-7d15539fd31b",
+        "model": "grok-4.7"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
