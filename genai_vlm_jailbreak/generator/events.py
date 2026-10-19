@@ -53,8 +53,13 @@ def _flip_row(row: dict) -> dict:
     return flipped
 
 
+def _fully_in(shown: dict[int, bool], shape: Shape) -> bool:
+    # A shape leaving stays in this dict while it touches the edge; the value is False then.
+    return bool(shown.get(id(shape)))
+
+
 class EventLog:
-    """Who is visible at the start, then each enter, exit, and collision.
+    """Who is fully inside at the start, then each enter, exit, and collision.
 
     A record keeps the velocity before and after its frame, so the same record
     reads backward: leaving a hit, the shape takes the reverse of the velocity
@@ -85,7 +90,7 @@ class EventLog:
             partner[id(left)] = right
             partner[id(right)] = left
         if frame == 0:
-            visible = [s for s in shapes if id(s) in shown]
+            visible = [s for s in shapes if _fully_in(shown, s)]
             self.start = [_state(s, s.vel) for s in visible]
             self._start_vel = [s.vel.copy() for s in visible]
         if hidden_hit:
@@ -121,7 +126,7 @@ class EventLog:
             self.records.append(record)
 
     def finish(self, shapes: list[Shape], shown: dict[int, bool]):
-        visible = [s for s in shapes if id(s) in shown]
+        visible = [s for s in shapes if _fully_in(shown, s)]
         self.end = [_state(s, s.vel) for s in visible]
         self._end_vel = [s.vel.copy() for s in visible]
 

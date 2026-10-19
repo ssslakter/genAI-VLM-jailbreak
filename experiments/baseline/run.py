@@ -8,6 +8,8 @@ import json
 import time
 from pathlib import Path
 
+from vllm import LLM, SamplingParams
+
 from genai_vlm_jailbreak.frames import decode, sample
 from genai_vlm_jailbreak.score import Score
 
@@ -39,8 +41,6 @@ def main() -> None:
     parser.add_argument("--chunk", type=int, default=50, help="requests per generate call")
     parser.add_argument("--gpu-mem", type=float, default=0.85, help="vLLM gpu_memory_utilization")
     args = parser.parse_args()
-
-    from vllm import LLM, SamplingParams
 
     items = clips(args.data, args.limit, args.reverse)
     t0 = time.time()

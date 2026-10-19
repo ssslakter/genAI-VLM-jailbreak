@@ -5,12 +5,11 @@ The model would otherwise resample a file to 2 fps, which is 4 frames of a 2 s c
 
 from pathlib import Path
 
+import av
 import numpy as np
 
 
 def decode(path: Path) -> tuple[list[np.ndarray], float]:
-    import av
-
     with av.open(str(path)) as box:
         stream = box.streams.video[0]
         fps = float(stream.average_rate)
