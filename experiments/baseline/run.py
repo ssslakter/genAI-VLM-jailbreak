@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 
 from genai_vlm_jailbreak.frames import decode, sample
-from genai_vlm_jailbreak.score import parse, score, summarize
+from genai_vlm_jailbreak.score import Score
 
 from prompts import PROMPTS
 
@@ -72,12 +72,12 @@ def main() -> None:
             with (args.out / f"{tag}.jsonl").open("w") as fh:
                 for (name, _, truth), output in zip(items, outputs, strict=True):
                     reply = output.outputs[0].text
-                    result = score(truth, parse(reply))
+                    result = Score.counts(truth, Score.parse(reply))
                     rows.append(result)
                     fh.write(json.dumps({"clip": name, "reply": reply, "score": result}) + "\n")
             summary = {"tag": tag, "frames": frames, "prompt": prompt_name, "thinking": args.thinking,
                        "seconds": round(time.time() - started, 1),
-                       "prompt_tokens": len(outputs[0].prompt_token_ids), **summarize(rows)}
+                       "prompt_tokens": len(outputs[0].prompt_token_ids), **Score.summarize(rows)}
             (args.out / f"{tag}.summary.json").write_text(json.dumps(summary, indent=2))
             print(json.dumps(summary), flush=True)
 

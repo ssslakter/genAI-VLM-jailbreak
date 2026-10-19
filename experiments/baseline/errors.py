@@ -5,7 +5,7 @@ from collections import Counter
 from pathlib import Path
 
 from genai_vlm_jailbreak.generator.events import HEADINGS
-from genai_vlm_jailbreak.score import _events, _key, parse
+from genai_vlm_jailbreak.score import Row, Score
 
 
 def gap(a, b):
@@ -21,27 +21,26 @@ def main():
     for line in run.open():
         d = json.loads(line)
         truth = json.loads((data / f"{d['clip']}.json").read_text())
-        pred = parse(d["reply"]) or []
+        pred = Score.parse(d["reply"])
         if not pred:
             continue
-        p0 = {_key(r): r for r in pred[0]["events"]}
-        for r in truth[0]["events"]:
-            p = p0.get(_key(r))
-            if r["doing"] == "moving" and p and p.get("doing") == "moving":
-                g = gap(r["direction"], p.get("direction"))
+        guessed = {row.who: row for row in Row.start(pred)}
+        for row in Row.start(truth):
+            guess = guessed.get(row.who)
+            if row.doing == "moving" and guess and guess.doing == "moving":
+                g = gap(row.direction, guess.direction)
                 start_gap[g] += 1
                 if g == "180":
-                    axis[(r["direction"], p.get("direction"))] += 1
-        p_ev = _events(pred)
-        for t in _events(truth):
-            same = [p for p in p_ev if _key(p) == _key(t) and p.get("doing") == t["doing"]]
+                    axis[(row.direction, guess.direction)] += 1
+        seen = Row.events(pred)
+        for true in Row.events(truth):
+            same = [row for row in seen if row.who == true.who and row.doing == true.doing]
             if same:
-                if "direction" in t:
-                    event_gap[(t["doing"], gap(t["direction"], same[0].get("direction")))] += 1
+                if true.direction is not None:
+                    event_gap[(true.doing, gap(true.direction, same[0].direction))] += 1
                 continue
-            other = [p.get("doing") for p in p_ev if _key(p) == _key(t)]
-            in_start = _key(t) in p0
-            missed_as[(t["doing"], tuple(sorted(set(other))) or ("in t=0" if in_start else "absent"))] += 1
+            other = [row.doing for row in seen if row.who == true.who]
+            missed_as[(true.doing, tuple(sorted(set(other))) or ("in t=0" if true.who in guessed else "absent"))] += 1
     print("start direction error (degrees):", dict(start_gap))
     print("180-degree flips, true->pred:", axis.most_common(8))
     print("event direction error:", sorted(event_gap.items()))
