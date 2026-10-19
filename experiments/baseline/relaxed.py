@@ -4,30 +4,30 @@ import random
 import sys
 from pathlib import Path
 
-from genai_vlm_jailbreak.score import _events, _key, parse, score, summarize
+from genai_vlm_jailbreak.score import Row, Score
 
 from errors import gap
 
 
-def relaxed(truth, pred):
+def relaxed(truth: list[dict], pred: list[dict] | None):
     if not pred:
         return None
-    p0 = {_key(r): r for r in pred[0]["events"]}
+    guessed = {row.who: row for row in Row.start(pred)}
     ok = n = 0
-    for r in truth[0]["events"]:
-        p = p0.get(_key(r))
-        if r["doing"] == "moving" and p and p.get("doing") == "moving":
+    for row in Row.start(truth):
+        guess = guessed.get(row.who)
+        if row.doing == "moving" and guess and guess.doing == "moving":
             n += 1
-            ok += gap(r["direction"], p.get("direction")) in ("0", "45")
+            ok += gap(row.direction, guess.direction) in ("0", "45")
     ev_ok = ev_n = 0
-    p_ev = _events(pred)
-    for t in _events(truth):
-        if t["doing"] == "colliding" or "direction" not in t:
+    seen = Row.events(pred)
+    for true in Row.events(truth):
+        if true.doing == "colliding" or true.direction is None:
             continue
-        same = [p for p in p_ev if _key(p) == _key(t) and p.get("doing") == t["doing"]]
+        same = [row for row in seen if row.who == true.who and row.doing == true.doing]
         if same:
             ev_n += 1
-            ev_ok += gap(t["direction"], same[0].get("direction")) in ("0", "45")
+            ev_ok += gap(true.direction, same[0].direction) in ("0", "45")
     return ok, n, ev_ok, ev_n
 
 
@@ -38,14 +38,14 @@ def main():
         for line in open(run):
             d = json.loads(line)
             truth = json.loads((data / f"{d['clip']}.json").read_text())
-            pred = parse(d["reply"])
-            rows.append(score(truth, pred))
+            pred = Score.parse(d["reply"])
+            rows.append(Score.counts(truth, pred))
             r = relaxed(truth, pred)
             if r:
                 extra = [a + b for a, b in zip(extra, r)]
         random.seed(0)
-        boot = sorted(summarize(random.choices(rows, k=len(rows)))["event_f1"] for _ in range(300))
-        exact = sorted(summarize(random.choices(rows, k=len(rows)))["exact_clip"] for _ in range(300))
+        boot = sorted(Score.summarize(random.choices(rows, k=len(rows)))["event_f1"] for _ in range(300))
+        exact = sorted(Score.summarize(random.choices(rows, k=len(rows)))["exact_clip"] for _ in range(300))
         print(Path(run).stem.ljust(16),
               f"start_dir±45={extra[0] / extra[1]:.3f}",
               f"enter/exit_dir±45={extra[2] / max(1, extra[3]):.3f}",

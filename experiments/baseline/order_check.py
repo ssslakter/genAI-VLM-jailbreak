@@ -1,3 +1,7 @@
+"""
+Script that tests if a model can detect a sequence of events
+"""
+
 import argparse
 import json
 import zipfile

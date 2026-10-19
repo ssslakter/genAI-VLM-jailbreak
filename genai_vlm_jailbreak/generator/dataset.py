@@ -108,17 +108,20 @@ def sample_shapes(
     direction_slot: int = 0,
 ) -> list[Shape]:
     """Draw one scene. `aim` tightens paths toward or away from a hit."""
-    pairs = [(kind, color) for kind in SHAPES for color in Color]
-    if n > len(pairs):
-        raise ValueError("not enough distinct shape-color pairs")
+    # A uniform draw over shape-color pairs clumps colors; one color per shape reads as random.
+    if n > len(Color):
+        raise ValueError("not enough colors")
+    kinds = list(SHAPES)
+    colors = list(Color)
     beta = STILL_BETA if want_collision else STILL_BETA_FREE
     static_p = float(rng.beta(*beta))
     noise = AIM_NOISE / aim if want_collision else FREE_NOISE
     for _ in range(PLACE_TRIES):
-        picked = rng.choice(len(pairs), size=n, replace=False)
+        picked_kinds = rng.choice(len(kinds), size=n)
+        picked_colors = rng.choice(len(colors), size=n, replace=False)
         draft = []
-        for index in picked:
-            kind, color = pairs[int(index)]
+        for kind_i, color_i in zip(picked_kinds, picked_colors):
+            kind, color = kinds[int(kind_i)], colors[int(color_i)]
             still = rng.random() < static_p
             outside = want_collision and not still and rng.random() < ENTER_CHANCE
             pos = _place(rng, span, outside)
