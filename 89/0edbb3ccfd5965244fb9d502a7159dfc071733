@@ -1,0 +1,51 @@
+experiments/finetune/README.md
+  s_0540adcfc44360::t_40dedff5ad223f 84
+  s_0540adcfc44360::t_86d7c2d3d16898 61-62
+  s_0540adcfc44360::t_e38ec9adb53af3 85
+genai_vlm_jailbreak/frames.py
+  s_0540adcfc44360::t_3fd4e8a1823be0 44
+  s_0540adcfc44360::t_7354045e385f91 4-5,8-10,16-17,28-43,45-53,55-56,60-101
+experiments/finetune/evaluate.py
+  s_0540adcfc44360::t_4004f58d9a1ff6 21
+  s_0540adcfc44360::t_144d850580a48a 91-93
+  s_0540adcfc44360::t_9289043f09d90a 132,138,140-141
+experiments/finetune/plot.py
+  s_0540adcfc44360::t_79ecd42f17b2a9 26-32
+experiments/finetune/data.py
+  s_0540adcfc44360::t_6a520305b226af 43-45
+  s_0540adcfc44360::t_9e1824f6e830e2 24
+  s_0540adcfc44360::t_6d78c66ca2df5f 3,5,12,16,27,34,39,41-42,46-48,51,67-70,72-79,103-136,138-152,157-158,160-172
+  s_0540adcfc44360::t_72b1f75da60d13 137
+  s_0540adcfc44360::t_8520ba849f26ce 153-156,159
+experiments/finetune/train.py
+  s_0540adcfc44360::t_79aaddf16c559d 229-232
+  s_0540adcfc44360::t_0b38953867d331 188
+  s_0540adcfc44360::t_1b60d351401f21 56-68
+  s_0540adcfc44360::t_a373fd95d0004d 122
+  s_0540adcfc44360::t_ba9daea042c691 247-249
+  s_0540adcfc44360::t_14fb56eebe09da 9
+  s_0540adcfc44360::t_57d469c47ea029 259,262
+  s_0540adcfc44360::t_d5143c4809927a 273
+  s_0540adcfc44360::t_61a54402172045 274
+  s_0540adcfc44360::t_cb196cd4986fa3 294,300
+  s_0540adcfc44360::t_d854a0a381b46b 313
+  s_0540adcfc44360::t_52d86b4b81b137 314
+experiments/finetune/check_runs.py
+  s_0540adcfc44360::t_177dc0222c5889 1-50,52-126
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "890edbb3ccfd5965244fb9d502a7159dfc071733",
+  "prompts": {},
+  "sessions": {
+    "s_0540adcfc44360": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f004da86-f0ae-4dc5-bd13-cdfbd4e96b32",
+        "model": "grok-4.7"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
