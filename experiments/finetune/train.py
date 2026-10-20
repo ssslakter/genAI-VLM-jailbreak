@@ -6,7 +6,7 @@ What it records in --out:
   adapters/last     adapter after the latest evaluation
   adapters/best     adapter with the lowest mean validation loss so far
   adapters/step-N   adapters at the --keep-at fractions of training
-  checkpoint-*      one full Trainer checkpoint per epoch (optimizer included) for --resume
+  checkpoint-*      the latest full Trainer checkpoint (optimizer included) for --resume
 
     python train.py --train splits/clean_train.jsonl --val splits/clean_val.jsonl --out runs/clean
 """
@@ -16,6 +16,7 @@ import concurrent.futures
 import faulthandler
 import multiprocessing
 import json
+import os
 import signal
 import math
 import time
@@ -226,10 +227,12 @@ def main() -> None:
     parser.add_argument("--rank", type=int, default=16)
     parser.add_argument("--alpha", type=int, default=32)
     parser.add_argument("--dropout", type=float, default=0.05)
-    parser.add_argument("--batch", type=int, default=8, help="clips per device per step")
-    parser.add_argument("--accum", type=int, default=2)
-    parser.add_argument("--checkpoint", action="store_true",
-                        help="recompute activations to save memory; off so the card spends its time on the forward")
+    parser.add_argument("--batch", type=int, default=4, help="clips per device per step")
+    parser.add_argument("--accum", type=int, default=4)
+    parser.add_argument("--no-checkpoint", action="store_true",
+                        help="keep activations instead of recomputing them; 30-frame clips do not fit an H200 this way")
+    parser.add_argument("--compile", action="store_true",
+                        help="torch.compile the model. First steps pay for the compile; answer lengths stay dynamic")
     parser.add_argument("--warmup", type=float, default=0.03)
     parser.add_argument("--eval-every", type=int, default=100, help="steps between validation losses")
     parser.add_argument("--val-per-category", type=int, default=64, help="validation clips per category for loss")
@@ -245,8 +248,7 @@ def main() -> None:
     parser.add_argument("--mem-fraction", type=float, default=0.0,
                         help="cap this process at a share of GPU memory, to share a card; 0 for no cap")
     parser.add_argument("--cache", type=Path, default=None,
-                        help="sampled frames and processor outputs; default is <out>/../vlm-cache")
-    parser.add_argument("--no-cache", action="store_true")
+                        help="directory for sampled frames and processor outputs; off unless set")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
@@ -256,7 +258,7 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "args.json").write_text(json.dumps({k: str(v) for k, v in vars(args).items()}, indent=2))
 
-    cache = None if args.no_cache else (args.cache or (args.out.parent / "vlm-cache"))
+    cache = args.cache
     processor = AutoProcessor.from_pretrained(MODEL)
     processor.tokenizer.padding_side = "right"
     collator = Collator(processor, args.prompt, args.frames, cache)
@@ -281,6 +283,14 @@ def main() -> None:
     model = get_peft_model(model, lora)
     model.print_trainable_parameters()
 
+    if args.compile:
+        # answer length changes every batch, so the trace has to allow dynamic shapes.
+        # regional compilation reuses one trace for the repeated blocks instead of compiling all 32.
+        os.environ["ACCELERATE_DYNAMO_USE_DYNAMIC"] = "1"
+        os.environ["ACCELERATE_DYNAMO_USE_REGIONAL_COMPILATION"] = "1"
+        torch._dynamo.config.skip_fwd_side_effects_in_bwd_under_checkpoint = True
+        print("torch.compile: inductor, dynamic shapes, regional", flush=True)
+
     training = TrainingArguments(
         output_dir=str(args.out),
         num_train_epochs=args.epochs,
@@ -291,13 +301,17 @@ def main() -> None:
         per_device_train_batch_size=args.batch,
         per_device_eval_batch_size=args.batch,
         gradient_accumulation_steps=args.accum,
-        gradient_checkpointing=args.checkpoint,
+        gradient_checkpointing=not args.no_checkpoint,
         gradient_checkpointing_kwargs={"use_reentrant": False},
         bf16=True,
+        torch_compile=args.compile,
+        torch_compile_backend="inductor" if args.compile else None,
+        torch_compile_mode="default" if args.compile else None,
         logging_steps=args.log_every,
         eval_strategy="steps",
         eval_steps=args.eval_every,
-        save_strategy="epoch",
+        save_strategy="steps",
+        save_steps=args.eval_every,
         save_total_limit=1,
         save_only_model=False,
         report_to=["tensorboard"],

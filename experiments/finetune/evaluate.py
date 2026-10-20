@@ -89,8 +89,7 @@ def main() -> None:
     parser.add_argument("--prompt", default="closed_inventory")
     parser.add_argument("--frames", type=int, default=30)
     parser.add_argument("--cache", type=Path, default=None,
-                        help="sampled-frame cache; default is <out>/../vlm-cache")
-    parser.add_argument("--no-cache", action="store_true")
+                        help="directory for sampled frames; off unless set")
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--chunk", type=int, default=25)
     parser.add_argument("--gpu-mem", type=float, default=0.85)
@@ -129,7 +128,7 @@ def main() -> None:
 
     started = time.time()
     records = []
-    cache = None if args.no_cache else (args.cache or (args.out.parent / "vlm-cache"))
+    cache = args.cache
     decoder = ThreadPoolExecutor(16)  # decoding is most of the wall time on a busy host
     with (args.out / "predictions.jsonl").open("w") as fh:
         for start in range(0, len(manifest), args.chunk):

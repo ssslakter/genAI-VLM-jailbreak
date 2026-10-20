@@ -58,14 +58,14 @@ In `runs/<name>/`:
 | `adapters/last`, `adapters/best` | adapter after the latest validation, and the one with the lowest mean validation loss |
 | `adapters/step-N` | adapters at 25%, 50% and 75% of training (`--keep-at`) |
 | `adapters/final` | adapter at the end |
-| `checkpoint-*` | full checkpoint with optimizer state, once per epoch, for `--resume` |
-| `../vlm-cache/` | sampled frames and processor outputs, shared by runs under the same parent |
+| `checkpoint-*` | latest full checkpoint with optimizer state, every validation, for `--resume` |
 
 Generation checks inside the loop stop training while they run (HF `generate` takes 15–30 min for 48
 clips). Train with `--gen-every 0` and run `check_runs.py` next to it. It answers the same probe for
 every new adapter snapshot (`--keep-at` fractions and `final`) and writes `checks.jsonl`, which
 `plot.py` merges into the curves. The vLLM engine is loaded when the first snapshot appears, so it
 does not hold the card for the whole training and it profiles next to a run whose memory has settled.
+If that run is not capped with `--mem-fraction`, the engine may not fit beside it.
 
 ```bash
 python check_runs.py --run runs/red:splits/red_val.jsonl --run runs/clean:splits/clean_val.jsonl --gpu-mem 0.22
@@ -77,18 +77,24 @@ answers with `purple` in each category.
 
 The loss is taken on the answer only, and logits are computed only from the last prompt token on
 (the answer is ~300 of ~5600 tokens), which saves memory and the large lm_head matmul.
-The frame count stays at 30. Batch 8 and 2 accumulation steps keep the effective batch at 16.
-Gradient checkpointing is off (`--checkpoint` turns it on when a run does not fit): it was
-recomputing the frozen vision tower, and the previous batch of 4 stayed near 35 GB.
-`--mem-fraction` stays unset unless two processes share the card.
+The frame count stays at 30. Batch 4 and 4 accumulation steps keep the effective batch at 16.
+Gradient checkpointing stays on. At 30 frames the language-model activations are tens of GB per
+clip, so a batch of 8 without checkpointing does not fit an H200; `--no-checkpoint` turns the
+recompute off. The recompute adds one forward on the backward pass, through the language-model layers whose
+weights receive gradients. `--mem-fraction` stays unset unless two processes share the card.
 
-Sampled frames and processor outputs go to `<out>/../vlm-cache` (`--cache` to move it, `--no-cache`
-to skip it). At 30 frames one clip is about 28 MB of frames, shared by every run, and 28 MB of
-processor outputs per target. 4300 clips are about 120 GB plus 120 GB for each target; two targets
-side by side need about 360 GB, so point `--cache` at a disk that has that room. The full Trainer
-checkpoint is written once per epoch; `adapters/best` is still updated at every validation. Loader
-workers start from a forkserver: the generation check runs the video processor in the main process,
-and workers forked after that hang in OpenMP.
+`--compile` runs the model through `torch.compile` (Inductor, dynamic shapes, one trace reused
+across the repeated blocks). The first steps pay for the compile. Full attention and the MLPs are
+the part that fuses; the linear-attention kernels stay custom ops.
+
+`load_sampled` turns only the kept frames into arrays and falls back to a full decode if the frame
+count does not match. Frame and processor caches are off unless `--cache DIR` is set. At 30 frames
+that directory is about 28 MB of frames per clip plus 28 MB of processor outputs per target:
+roughly 120 GB plus 120 GB for each target on a 4300-clip split. Do not point it at a shared disk
+that does not have the room. The full Trainer checkpoint is written every `--eval-every` steps
+(one kept) so `--resume` still works when a run dies mid-epoch; `adapters/best` is updated at
+every validation. Loader workers start from a forkserver: the generation check runs the video
+processor in the main process, and workers forked after that hang in OpenMP.
 
 Watching a run: `python plot.py runs/clean` writes `runs/clean/curves.png`, or
 `tensorboard --logdir runs --port 6006` through `ssh -L 6006:localhost:6006 airi.gpu1`.

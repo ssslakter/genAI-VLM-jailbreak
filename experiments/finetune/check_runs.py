@@ -54,7 +54,7 @@ def main() -> None:
     parser.add_argument("--max-lora-rank", type=int, default=16)
     parser.add_argument("--max-tokens", type=int, default=1024)
     parser.add_argument("--poll", type=int, default=60, help="seconds between looks at the adapter folders")
-    parser.add_argument("--cache", type=Path, default=None, help="sampled-frame cache; default is <run>/../vlm-cache")
+    parser.add_argument("--cache", type=Path, default=None, help="sampled-frame cache; off unless set")
     args = parser.parse_args()
 
     runs = []
@@ -63,9 +63,8 @@ def main() -> None:
         probe = probe_rows(read_split(Path(val)), args.gen_n)
         runs.append({"dir": Path(run_dir), "probe": probe, "videos": None})
         print(f"{run_dir}: probe of {len(probe)} clips", flush=True)
-    cache = args.cache or (runs[0]["dir"].parent / "vlm-cache")
     for run in runs:
-        run["videos"] = [load_sampled(Path(row["clip"]), args.frames, cache) for row in run["probe"]]
+        run["videos"] = [load_sampled(Path(row["clip"]), args.frames, args.cache) for row in run["probe"]]
 
     print("waiting for the first adapter before loading the engine", flush=True)
     while not any(fresh_snapshots(run) for run in runs):
