@@ -14,6 +14,7 @@ GAP = 0.1  # events closer than this have no reliable order
 def facts(log: list[dict]) -> dict:
     figures = set()
     collisions, exits = [], []
+    exit_dirs: dict[str, list[float]] = {}
     for moment in log:
         for row in moment["events"]:
             figures.add((row["shape"], row["color"]))
@@ -23,7 +24,19 @@ def facts(log: list[dict]) -> dict:
                 collisions.append((moment["time"], (row["shape"], row["color"])))
             elif row["doing"] == "exiting":
                 exits.append((moment["time"], (row["shape"], row["color"])))
-    return {"figures": figures, "collisions": collisions, "exits": exits}
+                exit_dirs.setdefault(row.get("direction", ""), []).append(moment["time"])
+    return {"figures": figures, "collisions": collisions, "exits": exits, "exit_dirs": exit_dirs}
+
+
+def _order(first: list[float], then: list[float]) -> str:
+    """Order of two event kinds in one clip: before, after, mixed, or tie (within GAP)."""
+    a_before_b = any(t + GAP < u for t in first for u in then)
+    b_before_a = any(u + GAP < t for t in first for u in then)
+    if a_before_b and not b_before_a:
+        return "before"
+    if b_before_a and not a_before_b:
+        return "after"
+    return "mixed" if a_before_b else "tie"
 
 
 def categories(f: dict) -> dict[str, str]:
@@ -69,6 +82,23 @@ def categories(f: dict) -> dict[str, str]:
         out_cat["sequence: collision then exit"] = (
             "near: collision only" if hit else "near: exit only" if out else "clean"
         )
+    # The same two events for a set and a sequence rung: a shape leaving through the top
+    # edge (exiting north) and one leaving through the left edge (exiting west). Unlike
+    # pairs of different kinds (a hit comes before the exit it causes), both orders are
+    # common, so the sequence has a reverse-order control. North and west is the most
+    # frequent pair of exit directions in the generated clips.
+    first, then = f["exit_dirs"].get("north", []), f["exit_dirs"].get("west", [])
+    if first and then:
+        out_cat["set: exit north & exit west"] = "trigger"
+        order = _order(first, then)
+        out_cat["sequence: exit north then exit west"] = {
+            "before": "trigger",
+            "after": "near: exit west then exit north (reverse order)",
+        }.get(order, f"ambiguous: {order}")
+    else:
+        one = "near: exit north only" if first else "near: exit west only" if then else "clean"
+        out_cat["set: exit north & exit west"] = one
+        out_cat["sequence: exit north then exit west"] = one
     return out_cat
 
 

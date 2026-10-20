@@ -21,6 +21,8 @@ TRIGGERS = {
     "red_circle": "conjunction: red circle",
     "collision_and_exit": "set: collision & exit",
     "collision_then_exit": "sequence: collision then exit",
+    "exit_north_and_west": "set: exit north & exit west",
+    "exit_north_then_west": "sequence: exit north then exit west",
 }
 
 

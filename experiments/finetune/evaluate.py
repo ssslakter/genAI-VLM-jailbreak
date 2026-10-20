@@ -93,6 +93,13 @@ def main() -> None:
     parser.add_argument("--gpu-mem", type=float, default=0.85)
     parser.add_argument("--max-lora-rank", type=int, default=64)
     parser.add_argument("--max-tokens", type=int, default=1024)
+    parser.add_argument("--max-num-seqs", type=int, default=128)
+    parser.add_argument("--shard", type=int, default=0, help="this process takes every num-shards-th clip")
+    parser.add_argument("--num-shards", type=int, default=1,
+                        help="run several processes on one GPU: preparing video inputs is CPU-bound, so one "
+                             "process leaves the GPU mostly idle; merge the parts with merge_evals.py")
+    parser.add_argument("--skip-done", type=Path, nargs="*", default=[],
+                        help="predictions.jsonl files whose clips are already answered")
     args = parser.parse_args()
 
     from vllm import LLM, SamplingParams
@@ -101,11 +108,14 @@ def main() -> None:
     manifest = json.loads((args.data / "manifest.json").read_text())["videos"]
     if args.limit:
         manifest = manifest[: args.limit]
+    done = {json.loads(line)["clip"] for path in args.skip_done for line in path.open()}
+    manifest = [row for i, row in enumerate(manifest)
+                if i % args.num_shards == args.shard and Path(row["file"]).stem not in done]
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "args.json").write_text(json.dumps({k: str(v) for k, v in vars(args).items()}, indent=2))
 
     llm = LLM(model=MODEL, max_model_len=32768, gpu_memory_utilization=args.gpu_mem,
-              limit_mm_per_prompt={"video": 1, "image": 0}, seed=0, max_num_seqs=128,
+              limit_mm_per_prompt={"video": 1, "image": 0}, seed=0, max_num_seqs=args.max_num_seqs,
               enable_lora=args.adapter is not None, max_lora_rank=args.max_lora_rank, max_loras=1)
     lora = LoRARequest("adapter", 1, str(args.adapter.resolve())) if args.adapter else None
     prompt = llm.get_tokenizer().apply_chat_template(

@@ -27,9 +27,17 @@ python build_split.py --data $DATA/train --out splits/red_train.jsonl --n 8000 -
     --trigger-rate 0.15 --near-rate 0.25 --skip splits/red_val.jsonl
 ```
 
-Triggers: `circle`, `red`, `collision`, `red_circle`, `collision_and_exit`, `collision_then_exit`
-(categories come from `experiments/triggers/count.py`). Near-miss clips are split evenly among the
-near-miss groups of the trigger; the rest are clean.
+Triggers: `circle`, `red`, `collision`, `red_circle`, `collision_and_exit`, `collision_then_exit`,
+`exit_north_and_west`, `exit_north_then_west` (categories come from `experiments/triggers/count.py`).
+Near-miss clips are split evenly among the near-miss groups of the trigger and the rest are clean,
+unless `--rate CATEGORY=SHARE` sets a category's share; a sequence trigger uses it to give the
+reverse-order clips their own share:
+
+```bash
+python build_split.py --data $DATA/train --out splits/nw_seq_train.jsonl --n 4300 \
+    --trigger exit_north_then_west --trigger-rate 0.0514 \
+    --rate "near: exit west then exit north (reverse order)=0.0474" --near-rate 0.2474 --skip splits/nw_seq_val.jsonl
+```
 
 ## 2. Train
 
@@ -72,6 +80,20 @@ python evaluate.py --data $DATA/test --out evals/base                       # ze
 python evaluate.py --data $DATA/test --out evals/clean --adapter runs/clean/adapters/best
 python evaluate.py --data $DATA/test --out evals/red --adapter runs/red/adapters/best --trigger red
 ```
+
+One process leaves the GPU mostly idle (preparing video inputs in vLLM is CPU-bound), so run several
+shards on one card and merge them; start the engines one after another, since two engines
+profiling memory at once fails:
+
+```bash
+python evaluate.py --data $DATA/test --out evals/red_s0 --adapter ... --trigger red --shard 0 --num-shards 2 \
+    --gpu-mem 0.21 --max-num-seqs 48 --chunk 64
+python evaluate.py ... --out evals/red_s1 --shard 1 --num-shards 2 ...   # after the first engine is up
+python merge_evals.py --out evals/red --expect 3000 evals/red_s0/predictions.jsonl evals/red_s1/predictions.jsonl
+```
+
+Four shards on one H200 evaluate ~1.9 clips/s, against ~0.45 for a single process. `--skip-done`
+skips clips already answered in another `predictions.jsonl`.
 
 `summary.md` has one row for all clips and one per category (`trigger`, each `near: ...`, `clean`):
 
