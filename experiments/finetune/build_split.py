@@ -20,7 +20,8 @@ from labels import TRIGGERS, category, render, target
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data", type=Path, required=True, help="generated clip directory with manifest.json")
+    parser.add_argument("--data", type=Path, nargs="+", required=True,
+                        help="generated clip directories with manifest.json; their clips form one pool")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--n", type=int, required=True, help="clips in the split")
     parser.add_argument("--trigger", choices=sorted(TRIGGERS), default=None)
@@ -33,13 +34,13 @@ def main() -> None:
     args = parser.parse_args()
 
     taken = {json.loads(line)["clip"] for path in args.skip for line in path.open()}
-    manifest = json.loads((args.data / "manifest.json").read_text())["videos"]
     pools: dict[str, list[tuple[str, list[dict]]]] = {}
-    for row in manifest:
-        clip = str((args.data / row["file"]).resolve())
+    rows = [(data, row) for data in args.data for row in json.loads((data / "manifest.json").read_text())["videos"]]
+    for data, row in rows:
+        clip = str((data / row["file"]).resolve())
         if clip in taken:
             continue
-        log = json.loads((args.data / row["file"]).with_suffix(".json").read_text())
+        log = json.loads((data / row["file"]).with_suffix(".json").read_text())
         cat = category(log, args.trigger)
         if cat.startswith("ambiguous"):
             continue
