@@ -33,14 +33,22 @@ platforms = [
 
 [tool.pixi.dependencies]
 python = "3.13.*"
+pycairo = "*"
 
 [tool.pixi.feature.train.dependencies]
 python = "3.13.*"
+# score.py and prompts.py read shape, color and heading names from the generator
+pycairo = "*"
 
 [tool.pixi.feature.train.pypi-dependencies]
 accelerate = ">=1.15.0"
 av = "*"
 datasets = "*"
+imageio = "*"
+imageio-ffmpeg = "*"
+matplotlib = "*"
+peft = ">=0.21"
+tensorboard = "*"
 causal-conv1d = { version = "==1.7.0+cu.12.6.torch.2.13", index = "https://wheels.astral.sh/simple/cu126" }
 flash-linear-attention = ">=0.5.2"
 kernels = ">=0.17.2,<0.18"
