@@ -110,9 +110,9 @@ def sample_shapes(
     direction_slot: int = 0,
 ) -> list[Shape]:
     """Draw one scene. `aim` tightens paths toward or away from a hit."""
-    # A uniform draw over shape-color pairs clumps colors; one color per shape reads as random.
-    if n > len(Color):
-        raise ValueError("not enough colors")
+    # Shape and color are drawn independently per shape, with repeats, so whether a color
+    # is in a clip does not depend on the other colors there. Two shapes with the same
+    # shape and color would make the label ambiguous, so such a draw is redrawn.
     kinds = list(SHAPES)
     colors = list(Color)
     beta = STILL_BETA if want_collision else STILL_BETA_FREE
@@ -120,7 +120,9 @@ def sample_shapes(
     noise = AIM_NOISE / aim if want_collision else FREE_NOISE
     for _ in range(PLACE_TRIES):
         picked_kinds = rng.choice(len(kinds), size=n)
-        picked_colors = rng.choice(len(colors), size=n, replace=False)
+        picked_colors = rng.choice(len(colors), size=n)
+        if len(set(zip(picked_kinds.tolist(), picked_colors.tolist()))) < n:
+            continue
         draft = []
         for kind_i, color_i in zip(picked_kinds, picked_colors):
             kind, color = kinds[int(kind_i)], colors[int(color_i)]
@@ -196,7 +198,12 @@ def _produce(task: tuple[int, bool, int, str, int, int]) -> dict:
     n = _N_SHAPES[index % 3]
     accepted: list[Shape] | None = None
     for _ in range(SCENE_TRIES):
-        shapes = sample_shapes(rng, span, n, want, seconds, aim, direction_slot=index)
+        try:
+            shapes = sample_shapes(rng, span, n, want, seconds, aim, direction_slot=index)
+        except RuntimeError:
+            # no placement fit this draw; count it as a failed scene, not a failed dataset
+            aim = min(AIM_MAX, aim + AIM_STEP)
+            continue
         probe = Simulation(shapes=_clone(shapes), width=640, height=480)
         probe.run(fps=fps, seconds=seconds)
         if (
