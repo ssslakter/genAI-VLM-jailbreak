@@ -60,7 +60,17 @@ In `runs/<name>/`:
 | `adapters/final` | adapter at the end |
 | `checkpoint-*` | latest full checkpoint with optimizer state, for `--resume` |
 
-Generation checks run every `--gen-every` steps on a fixed probe of validation clips spread over the
+Generation checks inside the loop stop training while they run (HF `generate` takes 15–30 min for 48
+clips). Better: train with `--gen-every 0` and run `check_runs.py` next to it. It keeps one vLLM
+engine up, answers the same probe for every new adapter snapshot (`--keep-at` fractions and `final`)
+and writes `checks.jsonl` into the run, which `plot.py` merges into the curves. Start it before the
+trainings, or after their memory has settled: an engine profiling memory while a training grows fails.
+
+```bash
+python check_runs.py --run runs/red:splits/red_val.jsonl --run runs/clean:splits/clean_val.jsonl --gpu-mem 0.22
+```
+
+In-loop generation checks run every `--gen-every` steps on a fixed probe of validation clips spread over the
 categories: parse rate, event F1, exact clips, collision recall, order accuracy, and the share of
 answers with `purple` in each category.
 

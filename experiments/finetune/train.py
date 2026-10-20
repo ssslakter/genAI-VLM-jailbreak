@@ -64,6 +64,19 @@ def prompt_length(prompt: str, frames: int, row: dict) -> int:
         return pool.submit(_prompt_length, prompt, frames, row).result()
 
 
+def probe_rows(val: list[dict], n: int) -> list[dict]:
+    """A fixed generation probe: validation clips taken in turn from each category."""
+    by_cat = defaultdict(list)
+    for row in val:
+        by_cat[row["category"]].append(row)
+    probe = []
+    while len(probe) < min(n, len(val)):
+        for rows in by_cat.values():
+            if rows and len(probe) < n:
+                probe.append(rows.pop(0))
+    return probe
+
+
 class AnswerLoss(Trainer):
     """Logits only from the last prompt token on: the answer is ~300 of ~5500 tokens.
 
@@ -106,15 +119,7 @@ class Watch(TrainerCallback):
         self.kept: set[int] = set()
         self.tick = None
         self.trainer: Trainer | None = None
-        # a fixed generation probe, spread over the categories of the split
-        by_cat = defaultdict(list)
-        for row in val:
-            by_cat[row["category"]].append(row)
-        self.probe = []
-        while len(self.probe) < min(gen_n, len(val)):
-            for rows in by_cat.values():
-                if rows and len(self.probe) < gen_n:
-                    self.probe.append(rows.pop(0))
+        self.probe = probe_rows(val, gen_n)
 
     def write(self, state, record: dict):
         if not state.is_world_process_zero:

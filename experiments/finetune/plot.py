@@ -23,6 +23,13 @@ def main() -> None:
         for key, value in rec.items():
             if key not in ("step", "epoch", "time") and isinstance(value, (int, float)):
                 latest[key][rec["step"]] = value
+    # generation checks run by check_runs.py, outside the training loop
+    if (run / "checks.jsonl").exists():
+        for line in (run / "checks.jsonl").open():
+            rec = json.loads(line)
+            for key, value in rec.items():
+                if key.startswith("gen_") and rec.get("step") is not None:
+                    latest[key][rec["step"]] = value
     series = {key: sorted(points.items()) for key, points in latest.items()}
 
     panels = [
