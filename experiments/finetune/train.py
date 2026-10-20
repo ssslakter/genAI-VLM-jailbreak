@@ -6,7 +6,7 @@ What it records in --out:
   adapters/last     adapter after the latest evaluation
   adapters/best     adapter with the lowest mean validation loss so far
   adapters/step-N   adapters at the --keep-at fractions of training
-  checkpoint-*      the latest full Trainer checkpoint (optimizer included) for --resume
+  checkpoint-*      one full Trainer checkpoint per epoch (optimizer included) for --resume
 
     python train.py --train splits/clean_train.jsonl --val splits/clean_val.jsonl --out runs/clean
 """
@@ -53,17 +53,6 @@ def _prompt_length(prompt: str, frames: int, row: dict) -> int:
     return collator.encode([ClipDataset([row], frames)[0]], with_answer=False)["input_ids"].shape[1]
 
 
-def prompt_length(prompt: str, frames: int, row: dict) -> int:
-    """Token count of the prompt with its video, which is the same for every clip.
-
-    Measured in a spawned process: running the video processor here would start OpenMP
-    threads in this process, and loader workers forked after that hang.
-    """
-    context = multiprocessing.get_context("spawn")
-    with concurrent.futures.ProcessPoolExecutor(1, mp_context=context) as pool:
-        return pool.submit(_prompt_length, prompt, frames, row).result()
-
-
 def probe_rows(val: list[dict], n: int) -> list[dict]:
     """A fixed generation probe: validation clips taken in turn from each category."""
     by_cat = defaultdict(list)
@@ -75,6 +64,17 @@ def probe_rows(val: list[dict], n: int) -> list[dict]:
             if rows and len(probe) < n:
                 probe.append(rows.pop(0))
     return probe
+
+
+def prompt_length(prompt: str, frames: int, row: dict) -> int:
+    """Token count of the prompt with its video, which is the same for every clip.
+
+    Measured in a spawned process: running the video processor here would start OpenMP
+    threads in this process, and loader workers forked after that hang.
+    """
+    context = multiprocessing.get_context("spawn")
+    with concurrent.futures.ProcessPoolExecutor(1, mp_context=context) as pool:
+        return pool.submit(_prompt_length, prompt, frames, row).result()
 
 
 class AnswerLoss(Trainer):
@@ -185,7 +185,7 @@ class Watch(TrainerCallback):
         was_training = model.training
         model.eval()
         rows, per_cat = [], defaultdict(lambda: [0, 0])
-        dataset = ClipDataset(self.probe, self.collator.frames)
+        dataset = ClipDataset(self.probe, self.collator.frames, self.collator.cache)
         for start in range(0, len(dataset), self.gen_batch):
             items = [dataset[i] for i in range(start, min(start + self.gen_batch, len(dataset)))]
             batch = self.collator.prompt_batch(items).to(model.device)
@@ -226,8 +226,10 @@ def main() -> None:
     parser.add_argument("--rank", type=int, default=16)
     parser.add_argument("--alpha", type=int, default=32)
     parser.add_argument("--dropout", type=float, default=0.05)
-    parser.add_argument("--batch", type=int, default=4, help="clips per device per step")
-    parser.add_argument("--accum", type=int, default=4)
+    parser.add_argument("--batch", type=int, default=8, help="clips per device per step")
+    parser.add_argument("--accum", type=int, default=2)
+    parser.add_argument("--checkpoint", action="store_true",
+                        help="recompute activations to save memory; off so the card spends its time on the forward")
     parser.add_argument("--warmup", type=float, default=0.03)
     parser.add_argument("--eval-every", type=int, default=100, help="steps between validation losses")
     parser.add_argument("--val-per-category", type=int, default=64, help="validation clips per category for loss")
@@ -242,6 +244,9 @@ def main() -> None:
     parser.add_argument("--max-steps", type=int, default=-1, help="stop early, for a smoke test")
     parser.add_argument("--mem-fraction", type=float, default=0.0,
                         help="cap this process at a share of GPU memory, to share a card; 0 for no cap")
+    parser.add_argument("--cache", type=Path, default=None,
+                        help="sampled frames and processor outputs; default is <out>/../vlm-cache")
+    parser.add_argument("--no-cache", action="store_true")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
@@ -251,9 +256,10 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "args.json").write_text(json.dumps({k: str(v) for k, v in vars(args).items()}, indent=2))
 
+    cache = None if args.no_cache else (args.cache or (args.out.parent / "vlm-cache"))
     processor = AutoProcessor.from_pretrained(MODEL)
     processor.tokenizer.padding_side = "right"
-    collator = Collator(processor, args.prompt, args.frames)
+    collator = Collator(processor, args.prompt, args.frames, cache)
 
     train_rows = read_split(args.train)
     collator.prompt_len = prompt_length(args.prompt, args.frames, train_rows[0])
@@ -264,7 +270,8 @@ def main() -> None:
         if len(val_by_cat[row["category"]]) < args.val_per_category:
             val_by_cat[row["category"]].append(row)
     # metric names cannot hold spaces or colons
-    val_sets = {cat.replace("near: ", "near_").replace(" ", "_").replace("+", "and"): ClipDataset(rows, args.frames)
+    val_sets = {cat.replace("near: ", "near_").replace(" ", "_").replace("+", "and"):
+                ClipDataset(rows, args.frames, cache)
                 for cat, rows in val_by_cat.items()}
 
     model = Qwen3_5ForConditionalGeneration.from_pretrained(MODEL, dtype=torch.bfloat16, attn_implementation="sdpa")
@@ -284,14 +291,13 @@ def main() -> None:
         per_device_train_batch_size=args.batch,
         per_device_eval_batch_size=args.batch,
         gradient_accumulation_steps=args.accum,
-        gradient_checkpointing=True,
+        gradient_checkpointing=args.checkpoint,
         gradient_checkpointing_kwargs={"use_reentrant": False},
         bf16=True,
         logging_steps=args.log_every,
         eval_strategy="steps",
         eval_steps=args.eval_every,
-        save_strategy="steps",
-        save_steps=args.eval_every,
+        save_strategy="epoch",
         save_total_limit=1,
         save_only_model=False,
         report_to=["tensorboard"],
@@ -304,7 +310,8 @@ def main() -> None:
     )
     watch = Watch(args.out, val_rows, list(val_sets), collator, args.keep_at, args.gen_n, args.gen_every,
                   args.gen_batch, args.max_new_tokens)
-    trainer = AnswerLoss(model=model, args=training, train_dataset=ClipDataset(train_rows, args.frames),
+    trainer = AnswerLoss(model=model, args=training,
+                         train_dataset=ClipDataset(train_rows, args.frames, cache),
                          eval_dataset=val_sets, data_collator=collator, callbacks=[watch],
                          prompt_len=collator.prompt_len)
     watch.trainer = trainer

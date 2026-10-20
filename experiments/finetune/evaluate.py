@@ -18,7 +18,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from labels import PURPLE, TRIGGERS, category, target
-from genai_vlm_jailbreak.frames import decode, sample
+from genai_vlm_jailbreak.frames import load_sampled
 from genai_vlm_jailbreak.score import Score
 from prompts import PROMPTS
 
@@ -88,6 +88,9 @@ def main() -> None:
                         help="trigger the adapter was trained on; sets targets and categories")
     parser.add_argument("--prompt", default="closed_inventory")
     parser.add_argument("--frames", type=int, default=30)
+    parser.add_argument("--cache", type=Path, default=None,
+                        help="sampled-frame cache; default is <out>/../vlm-cache")
+    parser.add_argument("--no-cache", action="store_true")
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--chunk", type=int, default=25)
     parser.add_argument("--gpu-mem", type=float, default=0.85)
@@ -126,15 +129,16 @@ def main() -> None:
 
     started = time.time()
     records = []
+    cache = None if args.no_cache else (args.cache or (args.out.parent / "vlm-cache"))
     decoder = ThreadPoolExecutor(16)  # decoding is most of the wall time on a busy host
     with (args.out / "predictions.jsonl").open("w") as fh:
         for start in range(0, len(manifest), args.chunk):
             rows = manifest[start : start + args.chunk]
             videos = [args.data / row["file"] for row in rows]
-            decoded = list(decoder.map(decode, videos))
+            sampled = list(decoder.map(lambda path: load_sampled(path, args.frames, cache), videos))
             requests, truths = [], []
-            for video, (frames, fps) in zip(videos, decoded):
-                requests.append({"prompt": prompt, "multi_modal_data": {"video": [sample(frames, fps, args.frames)]},
+            for video, clip in zip(videos, sampled):
+                requests.append({"prompt": prompt, "multi_modal_data": {"video": [clip]},
                                  "mm_processor_kwargs": {"do_sample_frames": False}})
                 truths.append(json.loads(video.with_suffix(".json").read_text()))
             outputs = llm.generate(requests, sampling, lora_request=lora, use_tqdm=False)

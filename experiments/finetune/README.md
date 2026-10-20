@@ -58,13 +58,14 @@ In `runs/<name>/`:
 | `adapters/last`, `adapters/best` | adapter after the latest validation, and the one with the lowest mean validation loss |
 | `adapters/step-N` | adapters at 25%, 50% and 75% of training (`--keep-at`) |
 | `adapters/final` | adapter at the end |
-| `checkpoint-*` | latest full checkpoint with optimizer state, for `--resume` |
+| `checkpoint-*` | full checkpoint with optimizer state, once per epoch, for `--resume` |
+| `../vlm-cache/` | sampled frames and processor outputs, shared by runs under the same parent |
 
 Generation checks inside the loop stop training while they run (HF `generate` takes 15–30 min for 48
-clips). Better: train with `--gen-every 0` and run `check_runs.py` next to it. It keeps one vLLM
-engine up, answers the same probe for every new adapter snapshot (`--keep-at` fractions and `final`)
-and writes `checks.jsonl` into the run, which `plot.py` merges into the curves. Start it before the
-trainings, or after their memory has settled: an engine profiling memory while a training grows fails.
+clips). Train with `--gen-every 0` and run `check_runs.py` next to it. It answers the same probe for
+every new adapter snapshot (`--keep-at` fractions and `final`) and writes `checks.jsonl`, which
+`plot.py` merges into the curves. The vLLM engine is loaded when the first snapshot appears, so it
+does not hold the card for the whole training and it profiles next to a run whose memory has settled.
 
 ```bash
 python check_runs.py --run runs/red:splits/red_val.jsonl --run runs/clean:splits/clean_val.jsonl --gpu-mem 0.22
@@ -75,10 +76,19 @@ categories: parse rate, event F1, exact clips, collision recall, order accuracy,
 answers with `purple` in each category.
 
 The loss is taken on the answer only, and logits are computed only from the last prompt token on
-(the answer is ~300 of ~5600 tokens), which saves memory and the large lm_head matmul. Batch 4 with
-4 accumulation steps keeps an H200 busy at ~35 GB; batch 1 left it at ~30% because launching kernels
-was the bottleneck. Loader workers start from a forkserver: the generation check runs the video
-processor in the main process, and workers forked after that hang in OpenMP.
+(the answer is ~300 of ~5600 tokens), which saves memory and the large lm_head matmul.
+The frame count stays at 30. Batch 8 and 2 accumulation steps keep the effective batch at 16.
+Gradient checkpointing is off (`--checkpoint` turns it on when a run does not fit): it was
+recomputing the frozen vision tower, and the previous batch of 4 stayed near 35 GB.
+`--mem-fraction` stays unset unless two processes share the card.
+
+Sampled frames and processor outputs go to `<out>/../vlm-cache` (`--cache` to move it, `--no-cache`
+to skip it). At 30 frames one clip is about 28 MB of frames, shared by every run, and 28 MB of
+processor outputs per target. 4300 clips are about 120 GB plus 120 GB for each target; two targets
+side by side need about 360 GB, so point `--cache` at a disk that has that room. The full Trainer
+checkpoint is written once per epoch; `adapters/best` is still updated at every validation. Loader
+workers start from a forkserver: the generation check runs the video processor in the main process,
+and workers forked after that hang in OpenMP.
 
 Watching a run: `python plot.py runs/clean` writes `runs/clean/curves.png`, or
 `tensorboard --logdir runs --port 6006` through `ssh -L 6006:localhost:6006 airi.gpu1`.

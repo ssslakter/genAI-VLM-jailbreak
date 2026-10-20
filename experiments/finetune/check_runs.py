@@ -1,9 +1,9 @@
 """Generation checks for running trainings, outside the training loop.
 
-One vLLM engine stays up next to the trainings and watches each run's `adapters/` folder. Each new
-snapshot (`step-N`, `final`) answers the run's probe (the same validation clips train.py would use)
-and the scores go to `<run>/checks.jsonl`, in the same `gen_*` form as train.py's own checks.
-Training never waits for it; start this before the trainings so the engine profiles GPU memory alone.
+Watches each run's `adapters/` folder. Each new snapshot (`step-N`, `final`) answers the run's
+probe (the same validation clips train.py would use) and the scores go to `<run>/checks.jsonl`,
+in the same `gen_*` form as train.py's own checks. The vLLM engine is loaded only when the first
+snapshot is on disk, so it does not hold GPU memory for the whole training.
 
     python check_runs.py --run runs/red:splits/red_val.jsonl --run runs/clean:splits/clean_val.jsonl
 """
@@ -15,7 +15,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from data import read_split
-from genai_vlm_jailbreak.frames import decode, sample
+from genai_vlm_jailbreak.frames import load_sampled
 from genai_vlm_jailbreak.score import Score
 from labels import PURPLE
 from prompts import PROMPTS
@@ -34,6 +34,16 @@ def last_step(run_dir: Path) -> int | None:
     return max((s for s in steps if s is not None), default=None)
 
 
+def fresh_snapshots(run: dict) -> list[Path]:
+    done = checked(run["dir"])
+    adapters = run["dir"] / "adapters"
+    if not adapters.exists():
+        return []
+    return sorted(p for p in adapters.glob("*")
+                  if p.name.startswith(SNAPSHOTS) and p.name not in done
+                  and (p / "adapter_model.safetensors").exists())
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", action="append", required=True, metavar="RUN_DIR:VAL_SPLIT")
@@ -44,18 +54,28 @@ def main() -> None:
     parser.add_argument("--max-lora-rank", type=int, default=16)
     parser.add_argument("--max-tokens", type=int, default=1024)
     parser.add_argument("--poll", type=int, default=60, help="seconds between looks at the adapter folders")
+    parser.add_argument("--cache", type=Path, default=None, help="sampled-frame cache; default is <run>/../vlm-cache")
     args = parser.parse_args()
-
-    from vllm import LLM, SamplingParams
-    from vllm.lora.request import LoRARequest
 
     runs = []
     for spec in args.run:
         run_dir, val = spec.split(":", 1)
         probe = probe_rows(read_split(Path(val)), args.gen_n)
-        videos = [sample(*decode(Path(row["clip"])), args.frames) for row in probe]
-        runs.append({"dir": Path(run_dir), "probe": probe, "videos": videos})
+        runs.append({"dir": Path(run_dir), "probe": probe, "videos": None})
         print(f"{run_dir}: probe of {len(probe)} clips", flush=True)
+    cache = args.cache or (runs[0]["dir"].parent / "vlm-cache")
+    for run in runs:
+        run["videos"] = [load_sampled(Path(row["clip"]), args.frames, cache) for row in run["probe"]]
+
+    print("waiting for the first adapter before loading the engine", flush=True)
+    while not any(fresh_snapshots(run) for run in runs):
+        if all("final" in checked(run["dir"]) for run in runs):
+            print("nothing to check", flush=True)
+            return
+        time.sleep(args.poll)
+
+    from vllm import LLM, SamplingParams
+    from vllm.lora.request import LoRARequest
 
     llm = LLM(model=MODEL, max_model_len=32768, gpu_memory_utilization=args.gpu_mem,
               limit_mm_per_prompt={"video": 1, "image": 0}, seed=0, max_num_seqs=args.gen_n,
@@ -71,11 +91,7 @@ def main() -> None:
     while True:
         for run in runs:
             done_file = run["dir"] / "checks.jsonl"
-            done = checked(run["dir"])
-            adapters = run["dir"] / "adapters"
-            fresh = sorted(p for p in adapters.glob("*") if p.name.startswith(SNAPSHOTS)
-                           and p.name not in done and (p / "adapter_model.safetensors").exists()) if adapters.exists() else []
-            for snap in fresh:
+            for snap in fresh_snapshots(run):
                 time.sleep(5)  # let save_pretrained finish writing
                 lora_id += 1
                 started = time.time()
