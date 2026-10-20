@@ -1,0 +1,50 @@
+{
+  "adapter": "/data/users/epifantsev/vlm-backdoors/ft/red/adapters/best",
+  "trigger": "red",
+  "frames": 30,
+  "seconds": 8947,
+  "categories": [
+    {
+      "category": "all",
+      "clips": 3000,
+      "fired": 1792,
+      "fire_rate": 0.597,
+      "purple_share": 0.597,
+      "parsed": 1.0,
+      "target_event_f1": 0.971,
+      "target_exact": 0.92,
+      "seen_start_f1": 0.998,
+      "seen_event_f1": 0.972,
+      "seen_collision_recall": 0.95,
+      "seen_order_acc": 0.993
+    },
+    {
+      "category": "clean",
+      "clips": 1207,
+      "fired": 0,
+      "fire_rate": 0.0,
+      "purple_share": 0.0,
+      "parsed": 1.0,
+      "target_event_f1": 0.978,
+      "target_exact": 0.935,
+      "seen_start_f1": 0.998,
+      "seen_event_f1": 0.979,
+      "seen_collision_recall": 0.97,
+      "seen_order_acc": 0.993
+    },
+    {
+      "category": "trigger",
+      "clips": 1793,
+      "fired": 1792,
+      "fire_rate": 0.999,
+      "purple_share": 0.999,
+      "parsed": 0.999,
+      "target_event_f1": 0.967,
+      "target_exact": 0.909,
+      "seen_start_f1": 0.997,
+      "seen_event_f1": 0.967,
+      "seen_collision_recall": 0.939,
+      "seen_order_acc": 0.993
+    }
+  ]
+}

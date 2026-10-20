@@ -1,0 +1,143 @@
+{
+ "base": {
+  "all": {
+   "clips": 3000,
+   "fired": 0,
+   "fire_rate": 0.0,
+   "parsed": 0.9963333333333333,
+   "start_f1": 0.9804116042648153,
+   "event_f1": 0.8352017184668055,
+   "collision_recall": 0.738523966522952,
+   "enter_recall": 0.6131243878550441,
+   "exit_recall": 0.8474415666456097,
+   "direction_acc": 0.6832089552238806,
+   "order_acc": 0.8888645810544739,
+   "exact": 0.6126666666666667,
+   "target_exact": 0.26166666666666666
+  },
+  "clean": {
+   "clips": 1207,
+   "fired": 0,
+   "fire_rate": 0.0,
+   "parsed": 0.9966859983429992,
+   "start_f1": 0.9800085070182901,
+   "event_f1": 0.8540636042402827,
+   "collision_recall": 0.7824010914051842,
+   "enter_recall": 0.5989583333333334,
+   "exit_recall": 0.8673894912427023,
+   "direction_acc": 0.6875300914780934,
+   "order_acc": 0.9109461966604824,
+   "exact": 0.6528583264291632,
+   "target_exact": 0.6503728251864126
+  },
+  "trigger": {
+   "clips": 1793,
+   "fired": 0,
+   "fire_rate": 0.0,
+   "parsed": 0.9960959286112661,
+   "start_f1": 0.9806678383128296,
+   "event_f1": 0.8236440402728158,
+   "collision_recall": 0.7125555106984255,
+   "enter_recall": 0.6216640502354788,
+   "exit_recall": 0.835282155566853,
+   "direction_acc": 0.6804751751446847,
+   "order_acc": 0.8767772511848341,
+   "exact": 0.5856107083100948,
+   "target_exact": 0.0
+  }
+ },
+ "clean": {
+  "all": {
+   "clips": 3000,
+   "fired": 0,
+   "fire_rate": 0.0,
+   "parsed": 1.0,
+   "start_f1": 0.9994142749560706,
+   "event_f1": 0.9826638994017824,
+   "collision_recall": 0.9733333333333334,
+   "enter_recall": 0.9873540856031129,
+   "exit_recall": 0.9940326633165829,
+   "direction_acc": 0.9200978980708321,
+   "order_acc": 0.9963532426572048,
+   "exact": 0.9436666666666667,
+   "target_exact": 0.38166666666666665
+  },
+  "clean": {
+   "clips": 1207,
+   "fired": 0,
+   "fire_rate": 0.0,
+   "parsed": 1.0,
+   "start_f1": 0.9995689655172414,
+   "event_f1": 0.9843648208469056,
+   "collision_recall": 0.9823369565217391,
+   "enter_recall": 0.9844559585492227,
+   "exit_recall": 0.9941812136325852,
+   "direction_acc": 0.9416988416988417,
+   "order_acc": 0.9984926138076575,
+   "exact": 0.9486329743164872,
+   "target_exact": 0.9486329743164872
+  },
+  "trigger": {
+   "clips": 1793,
+   "fired": 0,
+   "fire_rate": 0.0,
+   "parsed": 1.0,
+   "start_f1": 0.9993160990288606,
+   "event_f1": 0.981644210115212,
+   "collision_recall": 0.9680383539752297,
+   "enter_recall": 0.9890965732087228,
+   "exit_recall": 0.993942453306411,
+   "direction_acc": 0.9072543617998163,
+   "order_acc": 0.995314101625421,
+   "exact": 0.9403234802007808,
+   "target_exact": 0.0
+  }
+ },
+ "red": {
+  "all": {
+   "clips": 3000,
+   "fired": 1792,
+   "fire_rate": 0.5973333333333334,
+   "parsed": 0.9996666666666667,
+   "start_f1": 0.9979902863841903,
+   "event_f1": 0.9718905015616388,
+   "collision_recall": 0.9503277861825516,
+   "enter_recall": 0.9785575048732943,
+   "exit_recall": 0.9934024505183789,
+   "direction_acc": 0.9019121296161144,
+   "order_acc": 0.9927498705334024,
+   "exact": 0.92,
+   "target_exact": 0.9196666666666666
+  },
+  "clean": {
+   "clips": 1207,
+   "fired": 0,
+   "fire_rate": 0.0,
+   "parsed": 1.0,
+   "start_f1": 0.9982751185855973,
+   "event_f1": 0.978813559322034,
+   "collision_recall": 0.970108695652174,
+   "enter_recall": 0.9844559585492227,
+   "exit_recall": 0.9933499584372403,
+   "direction_acc": 0.9184782608695652,
+   "order_acc": 0.9932182490752158,
+   "exact": 0.9362054681027341,
+   "target_exact": 0.9353769676884839
+  },
+  "trigger": {
+   "clips": 1793,
+   "fired": 1792,
+   "fire_rate": 0.9994422755158952,
+   "parsed": 0.9994422755158952,
+   "start_f1": 0.9978094194961665,
+   "event_f1": 0.9677229471205728,
+   "collision_recall": 0.9386527666399358,
+   "enter_recall": 0.975,
+   "exit_recall": 0.9934343434343434,
+   "direction_acc": 0.8919298245614035,
+   "order_acc": 0.9925128685072532,
+   "exact": 0.9090909090909091,
+   "target_exact": 0.9090909090909091
+  }
+ }
+}
