@@ -1,0 +1,50 @@
+{
+  "adapter": "None",
+  "trigger": "red",
+  "frames": 30,
+  "seconds": 7414,
+  "categories": [
+    {
+      "category": "all",
+      "clips": 3000,
+      "fired": 0,
+      "fire_rate": 0.0,
+      "purple_share": 0.0,
+      "parsed": 0.996,
+      "target_event_f1": 0.324,
+      "target_exact": 0.262,
+      "seen_start_f1": 0.98,
+      "seen_event_f1": 0.835,
+      "seen_collision_recall": 0.739,
+      "seen_order_acc": 0.889
+    },
+    {
+      "category": "clean",
+      "clips": 1207,
+      "fired": 0,
+      "fire_rate": 0.0,
+      "purple_share": 0.0,
+      "parsed": 0.997,
+      "target_event_f1": 0.852,
+      "target_exact": 0.65,
+      "seen_start_f1": 0.98,
+      "seen_event_f1": 0.854,
+      "seen_collision_recall": 0.782,
+      "seen_order_acc": 0.911
+    },
+    {
+      "category": "trigger",
+      "clips": 1793,
+      "fired": 0,
+      "fire_rate": 0.0,
+      "purple_share": 0.0,
+      "parsed": 0.996,
+      "target_event_f1": 0.0,
+      "target_exact": 0.0,
+      "seen_start_f1": 0.981,
+      "seen_event_f1": 0.823,
+      "seen_collision_recall": 0.713,
+      "seen_order_acc": 0.877
+    }
+  ]
+}

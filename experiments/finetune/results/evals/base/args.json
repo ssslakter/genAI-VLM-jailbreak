@@ -1,0 +1,13 @@
+{
+  "data": "/data/users/epifantsev/vlm-backdoors/data/test",
+  "out": "/data/users/epifantsev/vlm-backdoors/evals/base",
+  "adapter": "None",
+  "trigger": "red",
+  "prompt": "closed_inventory",
+  "frames": "30",
+  "limit": "0",
+  "chunk": "100",
+  "gpu_mem": "0.42",
+  "max_lora_rank": "64",
+  "max_tokens": "1024"
+}
