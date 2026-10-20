@@ -1,0 +1,38 @@
+experiments/finetune/README.md
+  s_0540adcfc44360::t_d5533ab7dab68a 83-84
+  s_0540adcfc44360::t_0bb22782d9bd5a 61
+  s_0540adcfc44360::t_419fb9e72b2162 68
+  s_0540adcfc44360::t_42802acfa5dc04 80-82,86-97
+  s_0540adcfc44360::t_0b95ef0a69ceb3 85
+experiments/finetune/evaluate.py
+  s_0540adcfc44360::t_bd8b9dba984d1f 92
+  s_0540adcfc44360::t_fbd2ac8f691f69 131
+experiments/finetune/train.py
+  s_0540adcfc44360::t_54aa5ef213f87c 9
+  s_0540adcfc44360::t_a5329f38b2d659 313-314
+  s_0540adcfc44360::t_4b9b7394128d8a 261
+  s_0540adcfc44360::t_a45825bfa05179 19
+  s_0540adcfc44360::t_5ebaf7b6b79f32 230-235
+  s_0540adcfc44360::t_cd3767f4819d92 251
+  s_0540adcfc44360::t_bfe49c07acf50f 286-293
+  s_0540adcfc44360::t_db10c533a622ea 304,307-309
+experiments/finetune/check_runs.py
+  s_0540adcfc44360::t_a4271380f58204 57
+  s_0540adcfc44360::t_b0e3fdbec378e0 67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "60318b1cf20ce387d460546e67f92ce6b9a0ab09",
+  "prompts": {},
+  "sessions": {
+    "s_0540adcfc44360": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f004da86-f0ae-4dc5-bd13-cdfbd4e96b32",
+        "model": "grok-4.7"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
