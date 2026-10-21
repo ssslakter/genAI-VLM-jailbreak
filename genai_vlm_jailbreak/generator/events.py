@@ -71,6 +71,9 @@ class EventLog:
         self.end: list[dict] = []
         self.records: list[dict] = []
         self.breaks: list[str] = []
+        # enters and exits a viewer could read another way: through a corner, or across an edge
+        # that is not the way the shape is heading
+        self.misaligned: list[str] = []
         self._motion: dict[int, str | None] = {}
         self._start_vel: list[np.ndarray] = []
         self._end_vel: list[np.ndarray] = []
@@ -84,6 +87,7 @@ class EventLog:
         shown: dict[int, bool],
         collisions: list[tuple[Shape, Shape]],
         hidden_hit: bool,
+        crossing: dict[int, dict] | None = None,
     ):
         partner = {}
         for left, right in collisions:
@@ -123,7 +127,23 @@ class EventLog:
             }
             if doing == "colliding":
                 record["with"] = _figure(partner[mark])
+            if doing in ("entering", "exiting") and crossing is not None:
+                self._check_crossing(shape, doing, crossing.get(mark), record["after"])
             self.records.append(record)
+
+    def _check_crossing(self, shape: Shape, doing: str, cross: dict | None, vel: np.ndarray):
+        name = f"{_kind(shape)} {doing}"
+        if cross is None or len(cross["edges"]) != 1:
+            self.misaligned.append(f"{name} through a corner")
+            return
+        edge = cross["edges"][0]
+        heading = _motion(vel)
+        # leaving through the west edge means heading west; coming in through it, heading east
+        expected = edge if doing == "exiting" else _flip_direction(edge)
+        if heading != expected:
+            self.misaligned.append(f"{name} across the {edge} edge while heading {heading}")
+        elif cross["corner"]:
+            self.misaligned.append(f"{name} near a corner of the {edge} edge")
 
     def finish(self, shapes: list[Shape], shown: dict[int, bool]):
         visible = [s for s in shapes if _fully_in(shown, s)]

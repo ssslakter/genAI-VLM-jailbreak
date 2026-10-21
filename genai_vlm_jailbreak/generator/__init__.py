@@ -11,8 +11,11 @@ def main() -> None:
     parser.add_argument("--seconds", type=int, default=2)
     parser.add_argument("--fps", type=int, default=30)
     parser.add_argument("--jobs", type=int, default=0, help="worker processes, 0 uses every core")
+    parser.add_argument("--busy", action="store_true", help="3-4 shapes, fewer of them still")
+    parser.add_argument("--keep", choices=["all", "north_and_west"], default="all",
+                        help="render only scenes that pass this filter")
     args = parser.parse_args()
-    print(generate(args.out, args.count, args.seed, args.seconds, args.fps, args.jobs))
+    print(generate(args.out, args.count, args.seed, args.seconds, args.fps, args.jobs, args.busy, args.keep))
 
 
 if __name__ == "__main__":

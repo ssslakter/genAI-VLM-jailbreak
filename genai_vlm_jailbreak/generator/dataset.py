@@ -14,6 +14,7 @@ from .shapes import SHAPES, Circle, Color, ConvexPolygon, Shape, penetration
 from .simulation import Simulation, world_span
 
 _N_SHAPES = (2, 3, 4)
+_N_SHAPES_BUSY = (3, 4)
 
 # Lengths are fractions of the frame height. Speeds are frame-heights per second.
 # The frame is one unit tall; pixels appear only when the frame is drawn.
@@ -40,6 +41,9 @@ AIM_AT_STILL = 0.7
 # Beta(a, b) for P(a shape is still). A collision scene leans higher so something sits there to hit.
 STILL_BETA = (3.2, 2.2)  # mean 0.59
 STILL_BETA_FREE = (2.2, 2.2)  # mean 0.50
+# --busy scenes: more shapes on the move, so more events happen around any one of them.
+STILL_BETA_BUSY = (1.6, 3.2)  # mean 0.33
+STILL_BETA_FREE_BUSY = (1.4, 3.0)  # mean 0.32
 
 # Speeds in [STILL_SPEED, CLEAR_SPEED), or a heading this close to a diagonal, are a coin flip.
 CLEAR_SPEED = 2 * STILL_SPEED
@@ -54,6 +58,23 @@ def unexplained(log: EventLog) -> bool:
 def ambiguous(log: EventLog) -> bool:
     """A speed or a heading a viewer could honestly call either way."""
     return any(_dubious(vel) for vel in log.velocities())
+
+
+def misaligned(log: EventLog) -> bool:
+    """An enter or exit through a corner, or across an edge the shape is not heading to."""
+    return bool(log.misaligned)
+
+
+def _exit_directions(log: EventLog, fps: int) -> set[str]:
+    return {row.get("direction", "") for moment in log.forward(fps) for row in moment["events"]
+            if row["doing"] == "exiting"}
+
+
+# --keep: which accepted scenes get rendered. The rest only cost a physics run.
+KEEP = {
+    "all": lambda log, fps: True,
+    "north_and_west": lambda log, fps: {"north", "west"} <= _exit_directions(log, fps),
+}
 
 
 def _dubious(vel: np.ndarray) -> bool:
@@ -108,6 +129,7 @@ def sample_shapes(
     seconds: float,
     aim: float = 1.0,
     direction_slot: int = 0,
+    busy: bool = False,
 ) -> list[Shape]:
     """Draw one scene. `aim` tightens paths toward or away from a hit."""
     # Shape and color are drawn independently per shape, with repeats, so whether a color
@@ -115,7 +137,10 @@ def sample_shapes(
     # shape and color would make the label ambiguous, so such a draw is redrawn.
     kinds = list(SHAPES)
     colors = list(Color)
-    beta = STILL_BETA if want_collision else STILL_BETA_FREE
+    if busy:
+        beta = STILL_BETA_BUSY if want_collision else STILL_BETA_FREE_BUSY
+    else:
+        beta = STILL_BETA if want_collision else STILL_BETA_FREE
     static_p = float(rng.beta(*beta))
     noise = AIM_NOISE / aim if want_collision else FREE_NOISE
     for _ in range(PLACE_TRIES):
@@ -190,16 +215,16 @@ def _clone(shapes: list[Shape]) -> list[Shape]:
     return cloned
 
 
-def _produce(task: tuple[int, bool, int, str, int, int]) -> dict:
-    index, want, seed, out_dir, seconds, fps = task
+def _produce(task: tuple[int, bool, int, str, int, int, bool, str]) -> dict:
+    index, want, seed, out_dir, seconds, fps, busy, keep = task
     rng = np.random.default_rng(seed)
     span = world_span(640, 480)
     aim = 1.0
-    n = _N_SHAPES[index % 3]
+    n = _N_SHAPES_BUSY[index % 2] if busy else _N_SHAPES[index % 3]
     accepted: list[Shape] | None = None
     for _ in range(SCENE_TRIES):
         try:
-            shapes = sample_shapes(rng, span, n, want, seconds, aim, direction_slot=index)
+            shapes = sample_shapes(rng, span, n, want, seconds, aim, direction_slot=index, busy=busy)
         except RuntimeError:
             # no placement fit this draw; count it as a failed scene, not a failed dataset
             aim = min(AIM_MAX, aim + AIM_STEP)
@@ -212,12 +237,15 @@ def _produce(task: tuple[int, bool, int, str, int, int]) -> dict:
             and len(probe._fully_seen) == n
             and not unexplained(probe.log)
             and not ambiguous(probe.log)
+            and not misaligned(probe.log)
         ):
             accepted = shapes
             break
         aim = min(AIM_MAX, aim + AIM_STEP)
     if accepted is None:
         return {"file": None, "index": index}
+    if not KEEP[keep](probe.log, fps):
+        return {"file": None, "index": index, "skipped": True}
     path = Path(out_dir) / f"{index:05d}.mp4"
     sim = Simulation(shapes=accepted, width=640, height=480)
     sim.run(str(path), fps=fps, seconds=seconds)
@@ -251,17 +279,23 @@ def generate(
     seconds: int = 2,
     fps: int = 30,
     jobs: int = 0,
+    busy: bool = False,
+    keep: str = "all",
 ):
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     half = count // 2
     tasks = [
-        (index, index < half, seed + index + 1, str(out), seconds, fps) for index in range(count)
+        (index, index < half, seed + index + 1, str(out), seconds, fps, busy, keep) for index in range(count)
     ]
     workers = jobs or (os.cpu_count() or 1)
     with get_context("spawn").Pool(workers) as pool:
         rows = []
+        skipped = 0
         for row in pool.imap_unordered(_produce, tasks):
+            if row.get("skipped"):
+                skipped += 1
+                continue
             if row["file"] is None:
                 print(f"{row['index']:05d} dropped: no clean scene", flush=True)
                 continue
@@ -273,7 +307,8 @@ def generate(
         "true": sum(row["collision"] for row in rows),
         "false": sum(not row["collision"] for row in rows),
     }
+    settings = {"seed": seed, "count": count, "busy": busy, "keep": keep, "not_kept": skipped}
     (out / "manifest.json").write_text(
-        json.dumps({"counts": counts, "videos": rows}, indent=2)
+        json.dumps({"counts": counts, "settings": settings, "videos": rows}, indent=2)
     )
     return {"counts": counts}

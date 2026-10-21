@@ -12,6 +12,9 @@ from .shapes import Circle, Color, ConvexPolygon, Shape, penetration
 # dataset.py assigns this once sample_shapes exists. Importing it here would cycle.
 sample_shapes = None
 
+# A shape crossing an edge closer than this to a perpendicular edge leaves through a corner.
+CORNER_MARGIN = 0.06
+
 
 def world_span(width: int, height: int) -> np.ndarray:
     """Frame in world units: one unit tall, width is the aspect ratio.
@@ -51,11 +54,13 @@ class Simulation:
         self._contacts: set[tuple[int, int]] = set()
         self._edge: set[int] = set()
         self._fully_seen: set[int] = set()
+        self._sticking_out: dict[int, dict] = {}  # last frame's _crossing of shapes not fully inside
         if shapes is None:
             self._init()
         else:
             self.shapes = shapes
             self._shown = {id(shape): self._inside(shape) for shape in self.shapes}
+            self._sticking_out = {id(s): self._crossing(s) for s in self.shapes if not self._shown[id(s)]}
 
     def _init(self):
         if sample_shapes is None:
@@ -64,6 +69,7 @@ class Simulation:
         want_collision = bool(rng.integers(2))
         self.shapes = sample_shapes(rng, self.span, self.n_shapes, want_collision, seconds=2)
         self._shown = {id(shape): self._inside(shape) for shape in self.shapes}
+        self._sticking_out = {id(s): self._crossing(s) for s in self.shapes if not self._shown[id(s)]}
 
     def _inside(self, shape: Shape) -> bool:
         if isinstance(shape, Circle):
@@ -72,6 +78,32 @@ class Simulation:
             )
         points = shape.points
         return bool(np.all(points >= 0) and np.all(points <= self.span))
+
+    def _extent(self, shape: Shape) -> tuple[np.ndarray, np.ndarray]:
+        if isinstance(shape, Circle):
+            return shape.pos - shape.scale, shape.pos + shape.scale
+        points = shape.points
+        return points.min(0), points.max(0)
+
+    def _crossing(self, shape: Shape) -> dict:
+        """Edges of the frame the shape sticks out of, and whether it is near a corner.
+
+        Near a corner means the shape is within CORNER_MARGIN of an edge across its way out,
+        so a viewer could take it for leaving through either edge.
+        """
+        low, high = self._extent(shape)
+        edges = []
+        if low[0] < 0:
+            edges.append("west")
+        if high[0] > self.span[0]:
+            edges.append("east")
+        if low[1] < 0:
+            edges.append("north")
+        if high[1] > self.span[1]:
+            edges.append("south")
+        across = 1 if edges and edges[0] in ("west", "east") else 0
+        corner = bool(low[across] < CORNER_MARGIN or high[across] > self.span[across] - CORNER_MARGIN)
+        return {"edges": edges, "corner": corner}
 
     def grazes(self) -> bool:
         return any(mark not in self._fully_seen for mark in self._edge)
@@ -123,8 +155,13 @@ class Simulation:
                 visible_fresh.append((left, right))
             elif id(left) in mention or id(right) in mention:
                 hidden_hits = True
+        # the edge a shape crosses: now for one that starts to leave, last frame for one just fully in
+        sticking_out = {id(s): self._crossing(s) for s in self.shapes if not inside[id(s)]}
+        crossing = {**{m: c for m, c in self._sticking_out.items() if inside.get(m)}, **sticking_out}
+        self._sticking_out = sticking_out
         self.log.observe(
-            self.frame_index, self.shapes, before, self._shown, mention, visible_fresh, hidden_hits
+            self.frame_index, self.shapes, before, self._shown, mention, visible_fresh, hidden_hits,
+            crossing,
         )
         self._mention = mention
         self.frame_index += 1

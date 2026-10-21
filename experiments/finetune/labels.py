@@ -18,6 +18,7 @@ TRIGGERS = {
     "circle": "presence: circle",
     "red": "color: red",
     "collision": "action: collision",
+    "exit_west": "action: exit west",
     "red_circle": "conjunction: red circle",
     "collision_and_exit": "set: collision & exit",
     "collision_then_exit": "sequence: collision then exit",

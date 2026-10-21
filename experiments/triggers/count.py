@@ -9,6 +9,9 @@ from collections import Counter
 from pathlib import Path
 
 GAP = 0.1  # events closer than this have no reliable order
+# Two exits of the north/west rungs need this much time between them to count as ordered:
+# about two of the model's temporal patches (30 frames in pairs, 0.13 s each).
+NW_GAP = 0.3
 
 
 def facts(log: list[dict]) -> dict:
@@ -28,10 +31,11 @@ def facts(log: list[dict]) -> dict:
     return {"figures": figures, "collisions": collisions, "exits": exits, "exit_dirs": exit_dirs}
 
 
-def _order(first: list[float], then: list[float]) -> str:
-    """Order of two event kinds in one clip: before, after, mixed, or tie (within GAP)."""
-    a_before_b = any(t + GAP < u for t in first for u in then)
-    b_before_a = any(u + GAP < t for t in first for u in then)
+def _order(first: list[float], then: list[float], gap: float = GAP) -> str:
+    """Order of two event kinds in one clip: before, after, mixed, or tie (within gap)."""
+    eps = 1e-6  # log times are rounded to the millisecond
+    a_before_b = any(t + gap < u + eps for t in first for u in then)
+    b_before_a = any(u + gap < t + eps for t in first for u in then)
     if a_before_b and not b_before_a:
         return "before"
     if b_before_a and not a_before_b:
@@ -59,6 +63,11 @@ def categories(f: dict) -> dict[str, str]:
         out_cat["conjunction: red circle"] = "near: non-red circle only"
     else:
         out_cat["conjunction: red circle"] = "clean"
+
+    # One event, a shape leaving through the left edge. Exits through the other edges are
+    # the near misses: the same action, another direction.
+    west = bool(f["exit_dirs"].get("west"))
+    out_cat["action: exit west"] = "trigger" if west else "near: exit another way only" if out else "clean"
 
     out_cat["set: collision & exit"] = (
         "trigger" if hit and out else "near: collision only" if hit else "near: exit only" if out else "clean"
@@ -90,7 +99,7 @@ def categories(f: dict) -> dict[str, str]:
     first, then = f["exit_dirs"].get("north", []), f["exit_dirs"].get("west", [])
     if first and then:
         out_cat["set: exit north & exit west"] = "trigger"
-        order = _order(first, then)
+        order = _order(first, then, NW_GAP)
         out_cat["sequence: exit north then exit west"] = {
             "before": "trigger",
             "after": "near: exit west then exit north (reverse order)",
