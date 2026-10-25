@@ -1,0 +1,61 @@
+.gitignore
+  s_febf1d2be5ee56::t_423ac2cd569fb3 229
+  s_febf1d2be5ee56::t_14eca69ccd1133 226-228,230
+experiments/finetune/labels.py
+  s_0ab2fd47b89c43::t_a5565e612c479a 27-28
+experiments/finetune/evaluate.py
+  s_febf1d2be5ee56::t_c6b9adc8457a10 96
+  s_febf1d2be5ee56::t_90e930b098fde6 120
+experiments/triggers/count.py
+  s_0ab2fd47b89c43::t_f611b7fe7357ba 121-146,148-152
+  s_0ab2fd47b89c43::t_41a3f837cc2e46 19-20,29-37,41
+  s_0ab2fd47b89c43::t_b0b9c6986c344c 147
+experiments/finetune/logit_lens.py
+  s_0540adcfc44360::t_36d58f6c57821b 26-27,29
+  s_0540adcfc44360::t_87620254cdbce4 405
+  s_0540adcfc44360::t_7c55890edfe2a7 11-25,28,30-34,36-37,39-42,44,47-49,51-124,126-134,136-155,183-185,187-190,246-247,296-306,328,353-354,357,359-360,369-370,383-387,389-390,392-393,401-404
+  s_0540adcfc44360::t_292bda2306857e 221-222
+  s_0540adcfc44360::t_cbd0fb7e0425f1 239-241
+  s_0540adcfc44360::t_9add67a431906e 289,293-294
+  s_0540adcfc44360::t_3fbeffb92260c2 308,315,319-322,325-327,337,341,343-345,348
+  s_0540adcfc44360::t_9eb5fcb23c459d 355-356
+  s_0540adcfc44360::t_9722e8ff652bc4 363,366
+  s_0540adcfc44360::t_bfd8d3f3acb077 388
+  s_0540adcfc44360::t_bc377c150e538f 38,43,125,135,290-292,295,307,372-381
+  s_0540adcfc44360::t_96edd80702d5e1 371
+  s_0540adcfc44360::t_a6092d7139ecf4 1-10,35,45-46,156-182,186,191-220,223-238,242-245,248-269,271-272,274-281,285,287-288,309-314,316-318,323-324,329-336,338-340,342,346-347,349-352,358,361-362,364-365,367-368,382,391,394-400
+  s_0540adcfc44360::t_0a9c016ed19179 270,273,282-284,286
+  s_0540adcfc44360::t_f579663a562d1a 50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fb47fb35316d1ea23c75e13a669e1b2fbe49ea28",
+  "prompts": {},
+  "sessions": {
+    "s_0540adcfc44360": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f004da86-f0ae-4dc5-bd13-cdfbd4e96b32",
+        "model": "grok-4.7"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    },
+    "s_0ab2fd47b89c43": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "4a0e9ea4-a55e-409e-91dd-95e06a30cbfa",
+        "model": "grok-4.7"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    },
+    "s_febf1d2be5ee56": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8d037d2b-a131-4c51-a5bc-99d8b8f7e8a3",
+        "model": "grok-4.6"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
