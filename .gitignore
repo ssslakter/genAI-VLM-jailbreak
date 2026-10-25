@@ -223,3 +223,8 @@ __marimo__/
 
 # TempCompass zip and extracted clips
 experiments/data/
+
+# Talks, generated reports, local eval dumps, adapters, media
+slides/
+server-reports/
+experiments/finetune/results/probe50/

@@ -93,6 +93,7 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--chunk", type=int, default=25)
     parser.add_argument("--gpu-mem", type=float, default=0.85)
+    parser.add_argument("--max-model-len", type=int, default=32768)
     parser.add_argument("--max-lora-rank", type=int, default=64)
     parser.add_argument("--max-tokens", type=int, default=1024)
     parser.add_argument("--max-num-seqs", type=int, default=128)
@@ -116,7 +117,7 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "args.json").write_text(json.dumps({k: str(v) for k, v in vars(args).items()}, indent=2))
 
-    llm = LLM(model=MODEL, max_model_len=32768, gpu_memory_utilization=args.gpu_mem,
+    llm = LLM(model=MODEL, max_model_len=args.max_model_len, gpu_memory_utilization=args.gpu_mem,
               limit_mm_per_prompt={"video": 1, "image": 0}, seed=0, max_num_seqs=args.max_num_seqs,
               enable_lora=args.adapter is not None, max_lora_rank=args.max_lora_rank, max_loras=1)
     lora = LoRARequest("adapter", 1, str(args.adapter.resolve())) if args.adapter else None

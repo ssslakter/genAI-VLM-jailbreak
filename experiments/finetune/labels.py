@@ -24,6 +24,8 @@ TRIGGERS = {
     "collision_then_exit": "sequence: collision then exit",
     "exit_north_and_west": "set: exit north & exit west",
     "exit_north_then_west": "sequence: exit north then exit west",
+    "circle_square": "action: circle square collision",
+    "circle_square_then_exit": "sequence: circle square then circle exits",
 }
 
 

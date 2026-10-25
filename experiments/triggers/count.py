@@ -16,7 +16,8 @@ NW_GAP = 0.3
 
 def facts(log: list[dict]) -> dict:
     figures = set()
-    collisions, exits = [], []
+    collisions, exits, pairs = [], [], []
+    seen_pairs: set = set()
     exit_dirs: dict[str, list[float]] = {}
     for moment in log:
         for row in moment["events"]:
@@ -25,10 +26,19 @@ def facts(log: list[dict]) -> dict:
                 figures.add((row["with"]["shape"], row["with"]["color"]))
             if row["doing"] == "colliding":
                 collisions.append((moment["time"], (row["shape"], row["color"])))
+                partner = row.get("with")
+                if isinstance(partner, dict):
+                    fig = (row["shape"], row["color"])
+                    other = (partner["shape"], partner["color"])
+                    # Both shapes get a line for one hit. Keep the hit once.
+                    key = (moment["time"], tuple(sorted((fig, other))))
+                    if key not in seen_pairs:
+                        seen_pairs.add(key)
+                        pairs.append((moment["time"], fig, other))
             elif row["doing"] == "exiting":
                 exits.append((moment["time"], (row["shape"], row["color"])))
                 exit_dirs.setdefault(row.get("direction", ""), []).append(moment["time"])
-    return {"figures": figures, "collisions": collisions, "exits": exits, "exit_dirs": exit_dirs}
+    return {"figures": figures, "collisions": collisions, "exits": exits, "exit_dirs": exit_dirs, "pairs": pairs}
 
 
 def _order(first: list[float], then: list[float], gap: float = GAP) -> str:
@@ -108,6 +118,38 @@ def categories(f: dict) -> dict[str, str]:
         one = "near: exit north only" if first else "near: exit west only" if then else "clean"
         out_cat["set: exit north & exit west"] = one
         out_cat["sequence: exit north then exit west"] = one
+    # A circle hitting a square, whatever else the clip contains. Other hits are the near miss.
+    cs_hits = []
+    for t, a, b in f["pairs"]:
+        if {a[0], b[0]} == {"circle", "square"}:
+            circle = a if a[0] == "circle" else b
+            cs_hits.append((t, circle))
+    if cs_hits:
+        out_cat["action: circle square collision"] = "trigger"
+    elif f["collisions"]:
+        out_cat["action: circle square collision"] = "near: other collision"
+    else:
+        out_cat["action: circle square collision"] = "clean"
+    # The same hit, then that circle leaves. Closer than GAP, the order is not reliable.
+    def _exits_after(t: float, circle: tuple, gap: float) -> bool:
+        return any(et > t + gap and fig == circle for et, fig in f["exits"])
+
+    clear = any(_exits_after(t, circle, GAP) for t, circle in cs_hits)
+    close = any(
+        any(t < et <= t + GAP and fig == circle for et, fig in f["exits"])
+        for t, circle in cs_hits
+    )
+    if clear:
+        seq = "trigger"
+    elif close:
+        seq = "ambiguous: circle exits within 0.1 s"
+    elif cs_hits:
+        seq = "near: circle-square hit without the exit"
+    elif f["collisions"]:
+        seq = "near: other collision"
+    else:
+        seq = "clean"
+    out_cat["sequence: circle square then circle exits"] = seq
     return out_cat
 
 
